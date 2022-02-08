@@ -1,765 +1,21 @@
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id E2A94C433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:43:04 +0000 (UTC)
-Received: from localhost ([::1]:37774 helo=lists1p.gnu.org)
-	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCit-0006ml-H5
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:43:03 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:33140)
- by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgU-0003u5-G4
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:34 -0500
-Received: from [2607:f8b0:4864:20::72d] (port=35811
- helo=mail-qk1-x72d.google.com)
- by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgO-0005gq-T5
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:31 -0500
-Received: by mail-qk1-x72d.google.com with SMTP id 200so12313669qki.2
- for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
- h=from:to:cc:subject:date:message-id:mime-version
- :content-transfer-encoding;
- bh=gCko5cR5pSnQ/aYSMvucvq/LH2CuPK3HksNutoqqh9M=;
- b=DoDASi08FzdfdmxS7VfD5o535F+cRS4wiICXk5xzKk2m5oxVq3pcCqfBDND4+NS26s
- YAoAfDxOkv993siUdHjmbHBm8zcdqoml77h3nDDY5zZmnYoqACY2Nz/FACw1CM+Ub6K0
- rRbzQBOjzgGTzNtYsC4oXYQKQaG9efz5yVo/T5bzh/1Npk10b25MPnNV0qLhNvsBkYZi
- ttIJdSMQlqGxnisBZBejb0mFqrs1LM+NG3g3M4Tq9ghYYDwLl20iPPmPZOZZUMQtyRMH
- cfWDTRtw447rjS39plsf8k5Fik3q8ootXiug548uYWCawisqxdYzjxY0pWjLp+IURJiH
- HeXw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=1e100.net; s=20210112;
- h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
- :content-transfer-encoding;
- bh=gCko5cR5pSnQ/aYSMvucvq/LH2CuPK3HksNutoqqh9M=;
- b=5tfsrHP59DcWworq2mV5o5ZIBSNervtQUBWUnsHYj2g/kKaZcaRm1FimDSz0mA0LqA
- tZjlpNlkRlpiuta8FY8tZR9ncoEt5zVo6VtZK8qK206lPsGJrJ78MplWm5dvrI52f3rM
- qDVzMjR8SJB/8KsLwcchL5wtCOo0UqrkAjJlSawWEt5vdFTYPmUluFBRSTdBuTGN29BK
- 6dH4uMpa9meBEOqojdTCFnr4qgGlmOJhKxzsvKJnTW8lTyAadNtH2vEUqQ3Txuut65BE
- WeWjG8QP0vQRrZvdCeZT2+atlCdkxZOAsLgjgm7iAuZiNKQ4Iw2MaOi4CT25pHuEyeI6
- cTpQ==
-X-Gm-Message-State: AOAM530t3k/5/sc1MVv+8K827FEpUDDoOA/AaAVW8c7EE8G5iIFAoib+
- EYsWH93fn9XhIcOX65Gx2SFQuA53zsfxOg==
-X-Google-Smtp-Source: ABdhPJxr5tv4miFMpilA4n8ni/mF3nnQM4J/CAhweaxToFM61lK4McMm7Ow3D1cR/qNHjMTWZZs0nQ==
-X-Received: by 2002:a05:620a:400e:: with SMTP id
- h14mr1129570qko.521.1644273626876; 
- Mon, 07 Feb 2022 14:40:26 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.25
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:26 -0800 (PST)
-From: Will Cohen <wwcohen@gmail.com>
-To: qemu-devel@nongnu.org
-Subject: [PATCH v5 00/11] 9p: Add support for darwin
-Date: Mon,  7 Feb 2022 17:40:13 -0500
-Message-Id: <20220207224024.87745-1-wwcohen@gmail.com>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::72d
- (failed)
-Received-SPF: pass client-ip=2607:f8b0:4864:20::72d;
- envelope-from=wwcohen@gmail.com; helo=mail-qk1-x72d.google.com
-X-Spam_score_int: -12
-X-Spam_score: -1.3
-X-Spam_bar: -
-X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
- DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
- PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
- SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
- T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
-X-Spam_action: no action
-X-BeenThere: qemu-devel@nongnu.org
-X-Mailman-Version: 2.1.29
-Precedence: list
-List-Id: <qemu-devel.nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
- Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
- hi@alyssa.is, Will Cohen <wwcohen@gmail.com>,
- Paolo Bonzini <pbonzini@redhat.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-
-This is a followup to https://lists.gnu.org/archive/html/qemu-devel/2022-02/msg01223.html,
-adding 9p server support for Darwin.
-
-Since v4, the following changes have been made to the following patches:
-
-Patch 4/11: 9p: darwin: Handle struct dirent differences
-- Cleanup of telldir error handling
-- Remove superfluous error handling for qemu_dirent_off
-- Removal of superfluous whitespace
-- Adjust codir.c to use qemu_dirent_off instead of duplicating the logic
-
-Patch 9/11: 9p: darwin: Implement compatibility for mknodat
-- Move qemu_mknodat from 9p-util to osdep and os-posix
-
-Patch 10/11: 9p: darwin: meson: Allow VirtFS on Darwin
-- Add comments to patch commit
-- Note that virtfs_proxy_helper does not work on Darwin and adjust
-- Adjust meson virtfs error note to specify macOS
-
-Keno Fischer (10):
-  9p: linux: Fix a couple Linux assumptions
-  9p: Rename 9p-util -> 9p-util-linux
-  9p: darwin: Handle struct stat(fs) differences
-  9p: darwin: Handle struct dirent differences
-  9p: darwin: Ignore O_{NOATIME, DIRECT}
-  9p: darwin: Move XATTR_SIZE_MAX->P9_XATTR_SIZE_MAX
-  9p: darwin: *xattr_nofollow implementations
-  9p: darwin: Compatibility for f/l*xattr
-  9p: darwin: Implement compatibility for mknodat
-  9p: darwin: meson: Allow VirtFS on Darwin
-
-Will Cohen (1):
-  9p: darwin: Adjust assumption on virtio-9p-test
-
- fsdev/file-op-9p.h                     |  9 +++-
- fsdev/meson.build                      |  1 +
- hw/9pfs/9p-local.c                     | 27 ++++++++---
- hw/9pfs/9p-proxy.c                     | 38 +++++++++++++--
- hw/9pfs/9p-synth.c                     |  6 +++
- hw/9pfs/9p-util-darwin.c               | 64 ++++++++++++++++++++++++++
- hw/9pfs/{9p-util.c => 9p-util-linux.c} |  2 +-
- hw/9pfs/9p-util.h                      | 35 ++++++++++++++
- hw/9pfs/9p.c                           | 42 ++++++++++++++---
- hw/9pfs/9p.h                           | 11 +++++
- hw/9pfs/codir.c                        |  4 +-
- hw/9pfs/meson.build                    |  3 +-
- include/qemu/osdep.h                   | 10 ++++
- include/qemu/xattr.h                   |  4 +-
- meson.build                            | 14 ++++--
- os-posix.c                             | 34 ++++++++++++++
- tests/qtest/virtio-9p-test.c           |  2 +-
- 17 files changed, 281 insertions(+), 25 deletions(-)
- create mode 100644 hw/9pfs/9p-util-darwin.c
- rename hw/9pfs/{9p-util.c => 9p-util-linux.c} (97%)
-
--- 
-2.32.0 (Apple Git-132)
-
-
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 5F587C433EF
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:43:07 +0000 (UTC)
-Received: from localhost ([::1]:38076 helo=lists1p.gnu.org)
-	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCiw-0006ze-Dm
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:43:06 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:33290)
- by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCge-0003yE-3E
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:44 -0500
-Received: from [2607:f8b0:4864:20::f2f] (port=42749
- helo=mail-qv1-xf2f.google.com)
- by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgb-0005j5-5l
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:43 -0500
-Received: by mail-qv1-xf2f.google.com with SMTP id k9so12607614qvv.9
- for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
- h=from:to:cc:subject:date:message-id:in-reply-to:references
- :mime-version:content-transfer-encoding;
- bh=LvnPEGx9iqV8W0nDvi4JEWZEM9Qvo0QihLOjBamLuVQ=;
- b=LF8Je+PsVsMKRmEcObOt6PDHPVMMwysq+HoaVvGiuejR9cy5r6S4v3qS+PQoHn3mMo
- 7yNfEvyfrU7eMlZ92g5q0Vdhmu2EDzw73fP3XACJSmrEyX7hMyFQwElQRR8BLRku2Cfj
- DVvFuHEBpQAjiTxUqEhQKpEo/h936AwtarUttV7VQh5Rj+JjqF0Vkhhid+Vq5D+Lvcs2
- wsu/pmFpo/AV7fBSWpASCilcA0UbFUF/IyVJCzqVz7gevgXzLtQYKeUDwJSUMrTizsUZ
- hE2j3NfYNvawb0gVbE8gd54h17BT8kGtlDFB3nQKkI3X43/oizqqJcTSGRgHZYoMfWpx
- 2M+w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=1e100.net; s=20210112;
- h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
- :references:mime-version:content-transfer-encoding;
- bh=LvnPEGx9iqV8W0nDvi4JEWZEM9Qvo0QihLOjBamLuVQ=;
- b=IpI6VGeL1NLM6/DtO3OSji40S7YdzZOLZ/jpQZ1H0v9CPaMiLTI01cygUSKRRU2xqH
- EjaRyLHG/YdXYVbMWeLc/EJfl7RSdVtAWsagiq31Ut6R+N50jBZZ0DIpJqBTKypU6hP/
- LF8OIXy9ZyGpQw+ygP3dLTUq3DfovVrCAXFlea999qGsmQLE4LMYXFC4btsYiS6lBmsk
- aOvGSRFlqJUekz92oI5u6gmaWMv+oQhuWiAV2ytUZ7BdxPvndRGSxiT1+5VcP78PzGWW
- Qt2uNJyqfJMLUpMqCrxQrCOZR3SG/1i4VlOKJSPIYmfVkANlxQlRxZLHS9ipEVPEj8ll
- XvAQ==
-X-Gm-Message-State: AOAM532TYO/GgsoaNoNXaQxqbL7xgZotVItTLDhFH+JR1v4I2a3BECWy
- 8rngLv0zstqGYGOUBeoQhPH+e6sVRBdBjA==
-X-Google-Smtp-Source: ABdhPJxZ+DbF1nMD9KVIdj22UnG8dCU3MoN6JirHMiCVfBeSO3wRPYzHs9QFg8+jNsCWp+oSgwN9pw==
-X-Received: by 2002:a05:6214:20af:: with SMTP id
- 15mr1234558qvd.105.1644273638595; 
- Mon, 07 Feb 2022 14:40:38 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.37
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:38 -0800 (PST)
-From: Will Cohen <wwcohen@gmail.com>
-To: qemu-devel@nongnu.org
-Subject: [PATCH v5 09/11] 9p: darwin: Implement compatibility for mknodat
-Date: Mon,  7 Feb 2022 17:40:22 -0500
-Message-Id: <20220207224024.87745-10-wwcohen@gmail.com>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
-References: <20220207224024.87745-1-wwcohen@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2f
- (failed)
-Received-SPF: pass client-ip=2607:f8b0:4864:20::f2f;
- envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2f.google.com
-X-Spam_score_int: -12
-X-Spam_score: -1.3
-X-Spam_bar: -
-X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
- DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
- PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
- SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
- T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
-X-Spam_action: no action
-X-BeenThere: qemu-devel@nongnu.org
-X-Mailman-Version: 2.1.29
-Precedence: list
-List-Id: <qemu-devel.nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
- Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
- hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
- Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
- Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-
-From: Keno Fischer <keno@juliacomputing.com>
-
-Darwin does not support mknodat. However, to avoid race conditions
-with later setting the permissions, we must avoid using mknod on
-the full path instead. We could try to fchdir, but that would cause
-problems if multiple threads try to call mknodat at the same time.
-However, luckily there is a solution: Darwin includes a function
-that sets the cwd for the current thread only.
-This should suffice to use mknod safely.
-
-This function (pthread_fchdir_np) is protected by a check in
-meson in a patch later in tihs series.
-
-Signed-off-by: Keno Fischer <keno@juliacomputing.com>
-Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
-[Will Cohen: - Adjust coding style
-             - Replace clang references with gcc
-             - Note radar filed with Apple for missing syscall
-             - Replace direct syscall with pthread_fchdir_np and
-               adjust patch notes accordingly
-             - Move qemu_mknodat from 9p-util to osdep and os-posix]
-Signed-off-by: Will Cohen <wwcohen@gmail.com>
----
- hw/9pfs/9p-local.c   |  4 ++--
- include/qemu/osdep.h | 10 ++++++++++
- os-posix.c           | 34 ++++++++++++++++++++++++++++++++++
- 3 files changed, 46 insertions(+), 2 deletions(-)
-
-diff --git a/hw/9pfs/9p-local.c b/hw/9pfs/9p-local.c
-index a0d08e5216..d42ce6d8b8 100644
---- a/hw/9pfs/9p-local.c
-+++ b/hw/9pfs/9p-local.c
-@@ -682,7 +682,7 @@ static int local_mknod(FsContext *fs_ctx, V9fsPath *dir_path,
- 
-     if (fs_ctx->export_flags & V9FS_SM_MAPPED ||
-         fs_ctx->export_flags & V9FS_SM_MAPPED_FILE) {
--        err = mknodat(dirfd, name, fs_ctx->fmode | S_IFREG, 0);
-+        err = qemu_mknodat(dirfd, name, fs_ctx->fmode | S_IFREG, 0);
-         if (err == -1) {
-             goto out;
-         }
-@@ -697,7 +697,7 @@ static int local_mknod(FsContext *fs_ctx, V9fsPath *dir_path,
-         }
-     } else if (fs_ctx->export_flags & V9FS_SM_PASSTHROUGH ||
-                fs_ctx->export_flags & V9FS_SM_NONE) {
--        err = mknodat(dirfd, name, credp->fc_mode, credp->fc_rdev);
-+        err = qemu_mknodat(dirfd, name, credp->fc_mode, credp->fc_rdev);
-         if (err == -1) {
-             goto out;
-         }
-diff --git a/include/qemu/osdep.h b/include/qemu/osdep.h
-index d1660d67fa..f3a8367ece 100644
---- a/include/qemu/osdep.h
-+++ b/include/qemu/osdep.h
-@@ -810,3 +810,13 @@ static inline int platform_does_not_support_system(const char *command)
- #endif
- 
- #endif
-+
-+/*
-+ * As long as mknodat is not available on macOS, this workaround
-+ * using pthread_fchdir_np is needed. qemu_mknodat is defined in
-+ * os-posix.c
-+ */
-+#ifdef CONFIG_DARWIN
-+int pthread_fchdir_np(int fd);
-+#endif
-+int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev);
-diff --git a/os-posix.c b/os-posix.c
-index ae6c9f2a5e..95c1607065 100644
---- a/os-posix.c
-+++ b/os-posix.c
-@@ -24,6 +24,7 @@
-  */
- 
- #include "qemu/osdep.h"
-+#include <os/availability.h>
- #include <sys/wait.h>
- #include <pwd.h>
- #include <grp.h>
-@@ -332,3 +333,36 @@ int os_mlock(void)
-     return -ENOSYS;
- #endif
- }
-+
-+/*
-+ * As long as mknodat is not available on macOS, this workaround
-+ * using pthread_fchdir_np is needed.
-+ *
-+ * Radar filed with Apple for implementing mknodat:
-+ * rdar://FB9862426 (https://openradar.appspot.com/FB9862426)
-+ */
-+#ifdef CONFIG_DARWIN
-+
-+int pthread_fchdir_np(int fd) API_AVAILABLE(macosx(10.12));
-+
-+int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev)
-+{
-+    int preserved_errno, err;
-+    if (pthread_fchdir_np(dirfd) < 0) {
-+        return -1;
-+    }
-+    err = mknod(filename, mode, dev);
-+    preserved_errno = errno;
-+    /* Stop using the thread-local cwd */
-+    pthread_fchdir_np(-1);
-+    if (err < 0) {
-+        errno = preserved_errno;
-+    }
-+    return err;
-+}
-+#else
-+int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev)
-+{
-+    return mknodat(dirfd, filename, mode, dev);
-+}
-+#endif
--- 
-2.32.0 (Apple Git-132)
-
-
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 78325C433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:43:09 +0000 (UTC)
-Received: from localhost ([::1]:38166 helo=lists1p.gnu.org)
-	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCiy-000731-D9
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:43:08 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:33306)
- by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgf-0003yt-I6
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:45 -0500
-Received: from [2607:f8b0:4864:20::72c] (port=34476
- helo=mail-qk1-x72c.google.com)
- by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgd-0005jV-Ko
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:45 -0500
-Received: by mail-qk1-x72c.google.com with SMTP id bs32so12329398qkb.1
- for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
- h=from:to:cc:subject:date:message-id:in-reply-to:references
- :mime-version:content-transfer-encoding;
- bh=EuU6f2hsAisKalSy17XW/VmARf7CzBCyb+vigrLGnrQ=;
- b=mDcIkdQIPRA7YtIM/102EeTRyCxkcQmF87Jo5Y13hn3As1Pv+f7ho6MMwg/eJX22yQ
- g1iNZPEqEbXg0qhk78v64ijkJliOJ7ylvLr2rdrd6Vm4dEtbzgniiKZvMxTblDsm7v0G
- Ob5GLJHLM4yzQl2pstPkVjbITxJcbMFwJqaLGMDtIbLA6N3aJN+RbHKmtBBKmeyYCcln
- sCi536sh7MqgMw3hbMWpnQZUsV4f/AuwXiKl36ymI4+SsV8QbGBivdtqvWolskgEaTlu
- u3qMhcZN8BoURtQQ9Pc2OKG1sMI+sbG7pMyWCZtmYuzm4AFhrTsrji6+6d8Cj8iEa+2I
- zXfA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=1e100.net; s=20210112;
- h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
- :references:mime-version:content-transfer-encoding;
- bh=EuU6f2hsAisKalSy17XW/VmARf7CzBCyb+vigrLGnrQ=;
- b=K5Xie1KD9QStKZL//n81W8Ziq6bl9sJy7B4RzbntfyHZnXcfjU1ernfddOhZR2oZLK
- fJO9SLxtFWh8INDry2JiHux5CAY93Xqh3DuPoPS0P2eg/lfHvmqvyATiSKUnLJCwcTv/
- YrWiUUCcXlEslWqFsozIC0VMDB+Wp0zxBoSyFNvZBaWydFs+esNkOZgC8u0jLL0MGHFs
- Y39/TLyPBBAswEn1iGHHyQbUFxMCakg8JvnzkwFWf7FBHgMQP2XgTwVupZg8GaTHQfIY
- rpX9jAxphC1KiggXk4hI/FHwXeaoVLlcnaapEV7VqTKbFDMpto9iSyFKn12VL67ryiNC
- NxKQ==
-X-Gm-Message-State: AOAM531G+ZVXHngHgQtlbNmTjgYvyJfoqw6W+Ypp1boK3UeR74OR4qZk
- 85XXt7ZzLV/hoEFB+5+XWIxU5irmi/ZOyw==
-X-Google-Smtp-Source: ABdhPJyBfSOjCc3SFDldBKj7WE4ozjwy5wym1ZFLg1bcXC5yKLcqP7rSHnty4hYKYxqdQENMyHKaaw==
-X-Received: by 2002:a05:620a:4151:: with SMTP id
- k17mr1178093qko.630.1644273641489; 
- Mon, 07 Feb 2022 14:40:41 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.40
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:40 -0800 (PST)
-From: Will Cohen <wwcohen@gmail.com>
-To: qemu-devel@nongnu.org
-Subject: [PATCH v5 11/11] 9p: darwin: Adjust assumption on virtio-9p-test
-Date: Mon,  7 Feb 2022 17:40:24 -0500
-Message-Id: <20220207224024.87745-12-wwcohen@gmail.com>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
-References: <20220207224024.87745-1-wwcohen@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::72c
- (failed)
-Received-SPF: pass client-ip=2607:f8b0:4864:20::72c;
- envelope-from=wwcohen@gmail.com; helo=mail-qk1-x72c.google.com
-X-Spam_score_int: -12
-X-Spam_score: -1.3
-X-Spam_bar: -
-X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
- DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
- PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
- SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
- T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
-X-Spam_action: no action
-X-BeenThere: qemu-devel@nongnu.org
-X-Mailman-Version: 2.1.29
-Precedence: list
-List-Id: <qemu-devel.nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
- Fabian Franz <fabianfranz.oss@gmail.com>,
- Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
- hi@alyssa.is, Will Cohen <wwcohen@gmail.com>,
- Paolo Bonzini <pbonzini@redhat.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-
-The previous test depended on the assumption that P9_DOTL_AT_REMOVEDIR
-and AT_REMOVEDIR have the same value.
-
-While this is true on Linux, it is not true everywhere, and leads to an
-incorrect test failure on unlink_at, noticed when adding 9p to darwin:
-
-Received response 7 (RLERROR) instead of 77 (RUNLINKAT)
-Rlerror has errno 22 (Invalid argument)
-**
-
-ERROR:../tests/qtest/virtio-9p-test.c:305:v9fs_req_recv: assertion
-failed (hdr.id == id): (7 == 77) Bail out!
-
-ERROR:../tests/qtest/virtio-9p-test.c:305:v9fs_req_recv: assertion
-failed (hdr.id == id): (7 == 77)
-
-Signed-off-by: Fabian Franz <fabianfranz.oss@gmail.com>
-[Will Cohen: - Add explanation of patch and description
-               of pre-patch test failure]
-Signed-off-by: Will Cohen <wwcohen@gmail.com>
-Acked-by: Thomas Huth <thuth@redhat.com>
----
- tests/qtest/virtio-9p-test.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/qtest/virtio-9p-test.c b/tests/qtest/virtio-9p-test.c
-index 41fed41de1..6bcf89f0f8 100644
---- a/tests/qtest/virtio-9p-test.c
-+++ b/tests/qtest/virtio-9p-test.c
-@@ -1270,7 +1270,7 @@ static void fs_unlinkat_dir(void *obj, void *data, QGuestAllocator *t_alloc)
-     /* ... and is actually a directory */
-     g_assert((st.st_mode & S_IFMT) == S_IFDIR);
- 
--    do_unlinkat(v9p, "/", "02", AT_REMOVEDIR);
-+    do_unlinkat(v9p, "/", "02", P9_DOTL_AT_REMOVEDIR);
-     /* directory should be gone now */
-     g_assert(stat(new_dir, &st) != 0);
- 
--- 
-2.32.0 (Apple Git-132)
-
-
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 39371C433EF
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:44:17 +0000 (UTC)
-Received: from localhost ([::1]:41348 helo=lists1p.gnu.org)
-	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCk4-0000kZ-4E
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:44:16 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:33170)
- by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgX-0003up-Vw
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:41 -0500
-Received: from [2607:f8b0:4864:20::f2f] (port=46079
- helo=mail-qv1-xf2f.google.com)
- by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgU-0005h8-7k
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:36 -0500
-Received: by mail-qv1-xf2f.google.com with SMTP id c14so4722479qvl.12
- for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
- h=from:to:cc:subject:date:message-id:in-reply-to:references
- :mime-version:content-transfer-encoding;
- bh=/PP73rDd+L0mrT4S3PimAKm7HxWjvE6hAnQLDLlK/gY=;
- b=ElVmFkLEnBctqV5khl8L0kSI8JxDzrcCFOs7rTGnO61EfC5WjH3pDfbgkb7XPrAP/y
- pB1cJsVdWeeGoHvaRRYax+SeEs++Q6bCXPbQIDSBv/5dF7UxLqXUWfsTpyN4QEFiGgvc
- ixqibrzqGvYR0M03ICzRl385winBN1s4pJ7MsOdEHgwCYRi7w1Ht1AmnEXHMvvJ9sON0
- DL1jPmJn2WIQ1xF0B+LjA/yQHhdyCQwulI43bhWolXGQCZXLSLxLOHGyZ2fyZ3D0P7Xw
- wZY6cPYKXpj/jDroBunczb1vYjJhMR8DmfryCBgKUWIQdRXifzfpCiSjkhUbnOSPDFqb
- FyGQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=1e100.net; s=20210112;
- h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
- :references:mime-version:content-transfer-encoding;
- bh=/PP73rDd+L0mrT4S3PimAKm7HxWjvE6hAnQLDLlK/gY=;
- b=sjoizp3aueJ2fKZXbZsWdbCKE+euEMaQVzDlopzK/+L0gr3YhSuKWYPiX8/x5kkWbH
- td3qUR4vuirdS1W0lLZ1bImFag1JwXlNVt53L7J9I60xo1i93IP6oX46AcjCNqjY2M3M
- L+VscrLPs3p69TaZoG2Q0Sitd9c9MoneZQnYi6ZTcQhJQVs7bMhiF89U/g49QLZ0q02m
- UjUxGNo7fkiMuAjKWfyZ0eAR1yPx86h+KgsNU+FjUofAI6QsynNlHIDVwew7PcTbb2G+
- KK8vE5E1rt6wz1AUC6yUR0CccRV7ovjM5jLmBfQ/Sj3wwdIi0ZzkMIPalsPkOjmHKloj
- dlZw==
-X-Gm-Message-State: AOAM530y8o1qmT5q3+ZCwv1qgpM/S4EVcRz1MObM1fxMqcudyOLnRQjD
- 90zWND6kprC77RqgFMUSgV09dxs2WOLi3Q==
-X-Google-Smtp-Source: ABdhPJwucfGT7utyjOp52q2mK3QOGIlbBaxiS9KS5WKV/EdIgcprrlTTwIrN+HYeJdMevVnXrjwr5Q==
-X-Received: by 2002:a05:6214:ca5:: with SMTP id
- s5mr1357504qvs.35.1644273630832; 
- Mon, 07 Feb 2022 14:40:30 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.29
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:30 -0800 (PST)
-From: Will Cohen <wwcohen@gmail.com>
-To: qemu-devel@nongnu.org
-Subject: [PATCH v5 03/11] 9p: darwin: Handle struct stat(fs) differences
-Date: Mon,  7 Feb 2022 17:40:16 -0500
-Message-Id: <20220207224024.87745-4-wwcohen@gmail.com>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
-References: <20220207224024.87745-1-wwcohen@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2f
- (failed)
-Received-SPF: pass client-ip=2607:f8b0:4864:20::f2f;
- envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2f.google.com
-X-Spam_score_int: -12
-X-Spam_score: -1.3
-X-Spam_bar: -
-X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
- DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
- PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
- SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
- T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
-X-Spam_action: no action
-X-BeenThere: qemu-devel@nongnu.org
-X-Mailman-Version: 2.1.29
-Precedence: list
-List-Id: <qemu-devel.nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
- Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
- hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
- Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
- Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-
-From: Keno Fischer <keno@juliacomputing.com>
-
-Signed-off-by: Keno Fischer <keno@juliacomputing.com>
-Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
-[Will Cohen: - Note lack of f_namelen and f_frsize on Darwin
-             - Ensure that tv_sec and tv_nsec are both
-               initialized for Darwin and non-Darwin]
-Signed-off-by: Will Cohen <wwcohen@gmail.com>
----
- hw/9pfs/9p-proxy.c | 22 ++++++++++++++++++++--
- hw/9pfs/9p-synth.c |  2 ++
- hw/9pfs/9p.c       | 16 ++++++++++++++--
- 3 files changed, 36 insertions(+), 4 deletions(-)
-
-diff --git a/hw/9pfs/9p-proxy.c b/hw/9pfs/9p-proxy.c
-index 09bd9f1464..b1664080d8 100644
---- a/hw/9pfs/9p-proxy.c
-+++ b/hw/9pfs/9p-proxy.c
-@@ -123,10 +123,16 @@ static void prstatfs_to_statfs(struct statfs *stfs, ProxyStatFS *prstfs)
-     stfs->f_bavail = prstfs->f_bavail;
-     stfs->f_files = prstfs->f_files;
-     stfs->f_ffree = prstfs->f_ffree;
-+#ifdef CONFIG_DARWIN
-+    /* f_namelen and f_frsize do not exist on Darwin */
-+    stfs->f_fsid.val[0] = prstfs->f_fsid[0] & 0xFFFFFFFFU;
-+    stfs->f_fsid.val[1] = prstfs->f_fsid[1] >> 32 & 0xFFFFFFFFU;
-+#else
-     stfs->f_fsid.__val[0] = prstfs->f_fsid[0] & 0xFFFFFFFFU;
-     stfs->f_fsid.__val[1] = prstfs->f_fsid[1] >> 32 & 0xFFFFFFFFU;
-     stfs->f_namelen = prstfs->f_namelen;
-     stfs->f_frsize = prstfs->f_frsize;
-+#endif
- }
- 
- /* Converts proxy_stat structure to VFS stat structure */
-@@ -143,12 +149,24 @@ static void prstat_to_stat(struct stat *stbuf, ProxyStat *prstat)
-    stbuf->st_size = prstat->st_size;
-    stbuf->st_blksize = prstat->st_blksize;
-    stbuf->st_blocks = prstat->st_blocks;
-+   stbuf->st_atime = prstat->st_atim_sec;
-+   stbuf->st_mtime = prstat->st_mtim_sec;
-+   stbuf->st_ctime = prstat->st_ctim_sec;
-+#ifdef CONFIG_DARWIN
-+   stbuf->st_atimespec.tv_sec = prstat->st_atim_sec;
-+   stbuf->st_mtimespec.tv_sec = prstat->st_mtim_sec;
-+   stbuf->st_ctimespec.tv_sec = prstat->st_ctim_sec;
-+   stbuf->st_atimespec.tv_nsec = prstat->st_atim_nsec;
-+   stbuf->st_mtimespec.tv_nsec = prstat->st_mtim_nsec;
-+   stbuf->st_ctimespec.tv_nsec = prstat->st_ctim_nsec;
-+#else
-    stbuf->st_atim.tv_sec = prstat->st_atim_sec;
-+   stbuf->st_mtim.tv_sec = prstat->st_mtim_sec;
-+   stbuf->st_ctim.tv_sec = prstat->st_ctim_sec;
-    stbuf->st_atim.tv_nsec = prstat->st_atim_nsec;
--   stbuf->st_mtime = prstat->st_mtim_sec;
-    stbuf->st_mtim.tv_nsec = prstat->st_mtim_nsec;
--   stbuf->st_ctime = prstat->st_ctim_sec;
-    stbuf->st_ctim.tv_nsec = prstat->st_ctim_nsec;
-+#endif
- }
- 
- /*
-diff --git a/hw/9pfs/9p-synth.c b/hw/9pfs/9p-synth.c
-index b38088e066..4a4a776d06 100644
---- a/hw/9pfs/9p-synth.c
-+++ b/hw/9pfs/9p-synth.c
-@@ -427,7 +427,9 @@ static int synth_statfs(FsContext *s, V9fsPath *fs_path,
-     stbuf->f_bsize = 512;
-     stbuf->f_blocks = 0;
-     stbuf->f_files = synth_node_count;
-+#ifndef CONFIG_DARWIN
-     stbuf->f_namelen = NAME_MAX;
-+#endif
-     return 0;
- }
- 
-diff --git a/hw/9pfs/9p.c b/hw/9pfs/9p.c
-index 9c63e14b28..1563d7b7c6 100644
---- a/hw/9pfs/9p.c
-+++ b/hw/9pfs/9p.c
-@@ -1313,11 +1313,17 @@ static int stat_to_v9stat_dotl(V9fsPDU *pdu, const struct stat *stbuf,
-     v9lstat->st_blksize = stat_to_iounit(pdu, stbuf);
-     v9lstat->st_blocks = stbuf->st_blocks;
-     v9lstat->st_atime_sec = stbuf->st_atime;
--    v9lstat->st_atime_nsec = stbuf->st_atim.tv_nsec;
-     v9lstat->st_mtime_sec = stbuf->st_mtime;
--    v9lstat->st_mtime_nsec = stbuf->st_mtim.tv_nsec;
-     v9lstat->st_ctime_sec = stbuf->st_ctime;
-+#ifdef CONFIG_DARWIN
-+    v9lstat->st_atime_nsec = stbuf->st_atimespec.tv_nsec;
-+    v9lstat->st_mtime_nsec = stbuf->st_mtimespec.tv_nsec;
-+    v9lstat->st_ctime_nsec = stbuf->st_ctimespec.tv_nsec;
-+#else
-+    v9lstat->st_atime_nsec = stbuf->st_atim.tv_nsec;
-+    v9lstat->st_mtime_nsec = stbuf->st_mtim.tv_nsec;
-     v9lstat->st_ctime_nsec = stbuf->st_ctim.tv_nsec;
-+#endif
-     /* Currently we only support BASIC fields in stat */
-     v9lstat->st_result_mask = P9_STATS_BASIC;
- 
-@@ -3519,9 +3525,15 @@ static int v9fs_fill_statfs(V9fsState *s, V9fsPDU *pdu, struct statfs *stbuf)
-     f_bavail = stbuf->f_bavail / bsize_factor;
-     f_files  = stbuf->f_files;
-     f_ffree  = stbuf->f_ffree;
-+#ifdef CONFIG_DARWIN
-+    fsid_val = (unsigned int)stbuf->f_fsid.val[0] |
-+               (unsigned long long)stbuf->f_fsid.val[1] << 32;
-+    f_namelen = NAME_MAX;
-+#else
-     fsid_val = (unsigned int) stbuf->f_fsid.__val[0] |
-                (unsigned long long)stbuf->f_fsid.__val[1] << 32;
-     f_namelen = stbuf->f_namelen;
-+#endif
- 
-     return pdu_marshal(pdu, offset, "ddqqqqqqd",
-                        f_type, f_bsize, f_blocks, f_bfree,
--- 
-2.32.0 (Apple Git-132)
-
-
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 0DA27C433EF
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:46:54 +0000 (UTC)
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274022576175.22884642475128;
+ Mon, 7 Feb 2022 14:47:02 -0800 (PST)
 Received: from localhost ([::1]:46116 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCmb-0004Qh-LC
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:46:53 -0500
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCmj-0004Qh-AA
+	for importer@patchew.org; Mon, 07 Feb 2022 17:47:01 -0500
 Received: from eggs.gnu.org ([209.51.188.92]:33138)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
  (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgU-0003u4-GC
@@ -771,6 +27,12 @@ Received: from [2607:f8b0:4864:20::82a] (port=38810
  for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:32 -0500
 Received: by mail-qt1-x82a.google.com with SMTP id r14so13313953qtt.5
  for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:29 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.27
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
@@ -794,16 +56,11 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  3oEA==
 X-Gm-Message-State: AOAM532CyUecggRUAz92NhiJgLMjnrIusejwnq+KLYNbJB1pgA3k5tj9
  oPA22KVFXrarm1nwvoaYxzRJJF/YckDAZA==
-X-Google-Smtp-Source: ABdhPJzRe3sQOp8ZUjTOAv1vBcoq1/jihlUMB+PfbtgvBwm2ut6z8OFdm5+pNghiru9mCOvkA2c7dw==
+X-Google-Smtp-Source: 
+ ABdhPJzRe3sQOp8ZUjTOAv1vBcoq1/jihlUMB+PfbtgvBwm2ut6z8OFdm5+pNghiru9mCOvkA2c7dw==
 X-Received: by 2002:a05:622a:1356:: with SMTP id
- w22mr1277671qtk.100.1644273628294; 
+ w22mr1277671qtk.100.1644273628294;
  Mon, 07 Feb 2022 14:40:28 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.27
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:27 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
 Subject: [PATCH v5 01/11] 9p: linux: Fix a couple Linux assumptions
@@ -813,10 +70,14 @@ X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::82a
  (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
 Received-SPF: pass client-ip=2607:f8b0:4864:20::82a;
  envelope-from=wwcohen@gmail.com; helo=mail-qt1-x82a.google.com
 X-Spam_score_int: -12
@@ -844,9 +105,10 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  =?UTF-8?q?Philippe=20Mathieu-Daud=C3=A9?= <f4bug@amsat.org>, hi@alyssa.is,
  Michael Roitzsch <reactorcontrol@icloud.com>, Will Cohen <wwcohen@gmail.com>,
  Paolo Bonzini <pbonzini@redhat.com>, Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274024395100001
 
 From: Keno Fischer <keno@juliacomputing.com>
 
@@ -872,7 +134,7 @@ optimization later.
              - Add note about virtfs-proxy-helper being disabled
                on non-Linux for this patch series]
 Signed-off-by: Will Cohen <wwcohen@gmail.com>
-Reviewed-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+Reviewed-by: Philippe Mathieu-Daud=C3=A9 <f4bug@amsat.org>
 Reviewed-by: Greg Kurz <groug@kaod.org>
 ---
  fsdev/file-op-9p.h   | 9 ++++++++-
@@ -886,13 +148,13 @@ index 8fd89f0447..4997677460 100644
 --- a/fsdev/file-op-9p.h
 +++ b/fsdev/file-op-9p.h
 @@ -16,10 +16,17 @@
- 
+=20
  #include <dirent.h>
  #include <utime.h>
 -#include <sys/vfs.h>
  #include "qemu-fsdev-throttle.h"
  #include "p9array.h"
- 
+=20
 +#ifdef CONFIG_LINUX
 +# include <sys/vfs.h>
 +#endif
@@ -903,7 +165,7 @@ index 8fd89f0447..4997677460 100644
 +
  #define SM_LOCAL_MODE_BITS    0600
  #define SM_LOCAL_DIR_MODE_BITS    0700
- 
+=20
 diff --git a/hw/9pfs/9p-local.c b/hw/9pfs/9p-local.c
 index 210d9e7705..1a5e3eed73 100644
 --- a/hw/9pfs/9p-local.c
@@ -919,7 +181,7 @@ index 210d9e7705..1a5e3eed73 100644
  #endif
 +#endif
  #include <sys/ioctl.h>
- 
+=20
  #ifndef XFS_SUPER_MAGIC
 diff --git a/hw/9pfs/9p.c b/hw/9pfs/9p.c
 index 15b3f4d385..9c63e14b28 100644
@@ -934,7 +196,7 @@ index 15b3f4d385..9c63e14b28 100644
 +#else
 +#include <limits.h>
 +#endif
- 
+=20
  int open_fd_hw;
  int total_open_fd;
 diff --git a/include/qemu/xattr.h b/include/qemu/xattr.h
@@ -951,208 +213,29 @@ index a83fe8e749..f1d0f7be74 100644
 +#  endif
  #  include <sys/xattr.h>
  #endif
- 
--- 
+=20
+--=20
 2.32.0 (Apple Git-132)
 
 
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 71DBEC433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:47:49 +0000 (UTC)
-Received: from localhost ([::1]:49940 helo=lists1p.gnu.org)
-	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCnU-00074h-BH
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:47:48 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:33244)
- by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgc-0003vg-8i
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:42 -0500
-Received: from [2607:f8b0:4864:20::732] (port=46797
- helo=mail-qk1-x732.google.com)
- by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgW-0005hH-Cl
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:39 -0500
-Received: by mail-qk1-x732.google.com with SMTP id 13so12259569qkd.13
- for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
- h=from:to:cc:subject:date:message-id:in-reply-to:references
- :mime-version:content-transfer-encoding;
- bh=Dr/feHt4CQ3Ov1Gcud59/VipBt/NIJFjtcf+1R8zrqc=;
- b=EmYrCzq6SXjWv2/dve4ohc6EBt4RJOCnTXj3/fy25qtig6EdL9KQpkeidPWKdWu09w
- Fs2cd+EOLppsPA686I6LU0z2t6yA147Bo0Q4yLO8FTEFAVm93eDDS6dWw0WCqsHvdjnF
- 8MqE90IltGrJDVytZcvlw4Q3X6/LwqbvsQ1w1r2P4lnYZwkq5ZdurxmtLiaWj1Mjy430
- i27YobV7WzTUeJo7O20j+m6BTipmImh/T0YuOcp5KFMkE4mi8rrWx1nlsUzo3fE+CwIa
- BX511P4ylBl/21NnjZaBiXeexib4DCbYdQqLK2rL1Po+eeu53Tk4QafE1vqpPZUQyCXN
- 85BQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=1e100.net; s=20210112;
- h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
- :references:mime-version:content-transfer-encoding;
- bh=Dr/feHt4CQ3Ov1Gcud59/VipBt/NIJFjtcf+1R8zrqc=;
- b=PuADk/eze+DYlT2dsh0NaHGC8XlKDOzQfjifd7OF2hpPyqbU9t8hW9Zhyw1aVX4Gkh
- XeMAqyqzitcE7QdnFubSODquJvjkFM5GHQ4tpfFRfm+Q7BYI+p8/XcnYSl12dIt+QHHD
- MiN6diPTvrAhIjyb8I/+EaaSx7ubs/mxG5mcEDYKasBn2Dkbqq3pAmIvyHmUnxfckwVc
- CJrP7spV+b9W6PrTCCtuUMlhcSknF/IVJgnVCjbExAu4Ka7TMh12BUlLfvEqz91aqkHo
- YYucNtVWbtnKiTYP7+TOVaGl0S+f01xvB3ytgoMUOQp0KrhFNlDYhVIdE79j2Kt9A3gT
- X0Ug==
-X-Gm-Message-State: AOAM533fUdWUthO1cAUoksZTM0fYJRIE2o/cbwik7aXXVs8weKwudg/F
- c2hXoDjB5cXzYbtffvRzAYRjasr2f+e45Q==
-X-Google-Smtp-Source: ABdhPJx65r74g96zCyWBSvpI4ySSAU6O51L0crXDJ36dwrAZSAIXabyeIxgtW+ubz46awroGBMOINw==
-X-Received: by 2002:a37:aac9:: with SMTP id t192mr1225160qke.32.1644273633471; 
- Mon, 07 Feb 2022 14:40:33 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.32
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:32 -0800 (PST)
-From: Will Cohen <wwcohen@gmail.com>
-To: qemu-devel@nongnu.org
-Subject: [PATCH v5 05/11] 9p: darwin: Ignore O_{NOATIME, DIRECT}
-Date: Mon,  7 Feb 2022 17:40:18 -0500
-Message-Id: <20220207224024.87745-6-wwcohen@gmail.com>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
-References: <20220207224024.87745-1-wwcohen@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::732
- (failed)
-Received-SPF: pass client-ip=2607:f8b0:4864:20::732;
- envelope-from=wwcohen@gmail.com; helo=mail-qk1-x732.google.com
-X-Spam_score_int: -12
-X-Spam_score: -1.3
-X-Spam_bar: -
-X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
- DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
- PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
- SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
- T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
-X-Spam_action: no action
-X-BeenThere: qemu-devel@nongnu.org
-X-Mailman-Version: 2.1.29
-Precedence: list
-List-Id: <qemu-devel.nongnu.org>
-List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
-List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
-List-Post: <mailto:qemu-devel@nongnu.org>
-List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
-List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
- <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
- Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
- hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
- Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
- Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-
-From: Keno Fischer <keno@juliacomputing.com>
-
-Darwin doesn't have either of these flags. Darwin does have
-F_NOCACHE, which is similar to O_DIRECT, but has different
-enough semantics that other projects don't generally map
-them automatically. In any case, we don't support O_DIRECT
-on Linux at the moment either.
-
-Signed-off-by: Keno Fischer <keno@juliacomputing.com>
-[Michael Roitzsch: - Rebase for NixOS]
-Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
-[Will Cohen: - Adjust coding style]
-Signed-off-by: Will Cohen <wwcohen@gmail.com>
----
- hw/9pfs/9p-util.h |  2 ++
- hw/9pfs/9p.c      | 13 ++++++++++++-
- 2 files changed, 14 insertions(+), 1 deletion(-)
-
-diff --git a/hw/9pfs/9p-util.h b/hw/9pfs/9p-util.h
-index d41f37f085..0e445b5d52 100644
---- a/hw/9pfs/9p-util.h
-+++ b/hw/9pfs/9p-util.h
-@@ -41,6 +41,7 @@ again:
-     fd = openat(dirfd, name, flags | O_NOFOLLOW | O_NOCTTY | O_NONBLOCK,
-                 mode);
-     if (fd == -1) {
-+#ifndef CONFIG_DARWIN
-         if (errno == EPERM && (flags & O_NOATIME)) {
-             /*
-              * The client passed O_NOATIME but we lack permissions to honor it.
-@@ -53,6 +54,7 @@ again:
-             flags &= ~O_NOATIME;
-             goto again;
-         }
-+#endif
-         return -1;
-     }
- 
-diff --git a/hw/9pfs/9p.c b/hw/9pfs/9p.c
-index caf3b240fe..14e84c3bcf 100644
---- a/hw/9pfs/9p.c
-+++ b/hw/9pfs/9p.c
-@@ -138,11 +138,20 @@ static int dotl_to_open_flags(int flags)
-         { P9_DOTL_NONBLOCK, O_NONBLOCK } ,
-         { P9_DOTL_DSYNC, O_DSYNC },
-         { P9_DOTL_FASYNC, FASYNC },
-+#ifndef CONFIG_DARWIN
-+        { P9_DOTL_NOATIME, O_NOATIME },
-+        /*
-+         *  On Darwin, we could map to F_NOCACHE, which is
-+         *  similar, but doesn't quite have the same
-+         *  semantics. However, we don't support O_DIRECT
-+         *  even on linux at the moment, so we just ignore
-+         *  it here.
-+         */
-         { P9_DOTL_DIRECT, O_DIRECT },
-+#endif
-         { P9_DOTL_LARGEFILE, O_LARGEFILE },
-         { P9_DOTL_DIRECTORY, O_DIRECTORY },
-         { P9_DOTL_NOFOLLOW, O_NOFOLLOW },
--        { P9_DOTL_NOATIME, O_NOATIME },
-         { P9_DOTL_SYNC, O_SYNC },
-     };
- 
-@@ -171,10 +180,12 @@ static int get_dotl_openflags(V9fsState *s, int oflags)
-      */
-     flags = dotl_to_open_flags(oflags);
-     flags &= ~(O_NOCTTY | O_ASYNC | O_CREAT);
-+#ifndef CONFIG_DARWIN
-     /*
-      * Ignore direct disk access hint until the server supports it.
-      */
-     flags &= ~O_DIRECT;
-+#endif
-     return flags;
- }
- 
--- 
-2.32.0 (Apple Git-132)
-
-
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id C85D6C433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:50:48 +0000 (UTC)
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274260643753.713740414275;
+ Mon, 7 Feb 2022 14:51:00 -0800 (PST)
 Received: from localhost ([::1]:53892 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCqN-0001RP-St
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:50:47 -0500
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCqZ-0001RP-DO
+	for importer@patchew.org; Mon, 07 Feb 2022 17:50:59 -0500
 Received: from eggs.gnu.org ([209.51.188.92]:33190)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
  (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgY-0003ut-KS
@@ -1164,6 +247,12 @@ Received: from [2607:f8b0:4864:20::730] (port=37792
  for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:37 -0500
 Received: by mail-qk1-x730.google.com with SMTP id 71so12312869qkf.4
  for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:30 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.28
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
@@ -1187,16 +276,11 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  +mTQ==
 X-Gm-Message-State: AOAM530tauZQ/3o4qh7pmrFR6KMOBjmIPKRCMpsYEKEwQldNzsUMIx8s
  F2ESQ5ZDYfmczLmg4atNz3qG68N3V/9dSw==
-X-Google-Smtp-Source: ABdhPJzg//J+okULWRgXhQz0Pv1GYP1Go5VK2pKQ83boc9C+cKDNpwDbCZ0ZCD8eHZsYCnECUXBkEw==
+X-Google-Smtp-Source: 
+ ABdhPJzg//J+okULWRgXhQz0Pv1GYP1Go5VK2pKQ83boc9C+cKDNpwDbCZ0ZCD8eHZsYCnECUXBkEw==
 X-Received: by 2002:a05:620a:31a7:: with SMTP id
- bi39mr1195904qkb.124.1644273629574; 
+ bi39mr1195904qkb.124.1644273629574;
  Mon, 07 Feb 2022 14:40:29 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.28
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:28 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
 Subject: [PATCH v5 02/11] 9p: Rename 9p-util -> 9p-util-linux
@@ -1206,10 +290,14 @@ X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::730
  (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
 Received-SPF: pass client-ip=2607:f8b0:4864:20::730;
  envelope-from=wwcohen@gmail.com; helo=mail-qk1-x730.google.com
 X-Spam_score_int: -12
@@ -1237,9 +325,10 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  =?UTF-8?q?Philippe=20Mathieu-Daud=C3=A9?= <f4bug@amsat.org>, hi@alyssa.is,
  Michael Roitzsch <reactorcontrol@icloud.com>, Will Cohen <wwcohen@gmail.com>,
  Paolo Bonzini <pbonzini@redhat.com>, Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274262428100001
 
 From: Keno Fischer <keno@juliacomputing.com>
 
@@ -1253,12 +342,12 @@ Signed-off-by: Keno Fischer <keno@juliacomputing.com>
 Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
 Signed-off-by: Will Cohen <wwcohen@gmail.com>
 Reviewed-by: Greg Kurz <groug@kaod.org>
-Reviewed-by: Philippe Mathieu-Daudé <f4bug@amsat.org>
+Reviewed-by: Philippe Mathieu-Daud=C3=A9 <f4bug@amsat.org>
 ---
- hw/9pfs/{9p-util.c => 9p-util-linux.c} | 2 +-
+ hw/9pfs/{9p-util.c =3D> 9p-util-linux.c} | 2 +-
  hw/9pfs/meson.build                    | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
- rename hw/9pfs/{9p-util.c => 9p-util-linux.c} (97%)
+ rename hw/9pfs/{9p-util.c =3D> 9p-util-linux.c} (97%)
 
 diff --git a/hw/9pfs/9p-util.c b/hw/9pfs/9p-util-linux.c
 similarity index 97%
@@ -1293,84 +382,92 @@ index 99be5d9119..1b28e70040 100644
 +fs_ss.add(when: 'CONFIG_LINUX', if_true: files('9p-util-linux.c'))
  fs_ss.add(when: 'CONFIG_XEN', if_true: files('xen-9p-backend.c'))
  softmmu_ss.add_all(when: 'CONFIG_FSDEV_9P', if_true: fs_ss)
- 
--- 
+=20
+--=20
 2.32.0 (Apple Git-132)
 
 
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 098CAC433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:51:37 +0000 (UTC)
-Received: from localhost ([::1]:57006 helo=lists1p.gnu.org)
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644273873360421.5354032823427;
+ Mon, 7 Feb 2022 14:44:33 -0800 (PST)
+Received: from localhost ([::1]:41348 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCr9-0003fa-VE
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:51:35 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:33242)
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCkJ-0000kZ-Tp
+	for importer@patchew.org; Mon, 07 Feb 2022 17:44:31 -0500
+Received: from eggs.gnu.org ([209.51.188.92]:33170)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgc-0003vf-7j
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:42 -0500
-Received: from [2607:f8b0:4864:20::f2b] (port=42745
- helo=mail-qv1-xf2b.google.com)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgX-0003up-Vw
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:41 -0500
+Received: from [2607:f8b0:4864:20::f2f] (port=46079
+ helo=mail-qv1-xf2f.google.com)
  by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
- (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgX-0005ih-VM
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:40 -0500
-Received: by mail-qv1-xf2b.google.com with SMTP id k9so12607540qvv.9
- for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:36 -0800 (PST)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgU-0005h8-7k
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:36 -0500
+Received: by mail-qv1-xf2f.google.com with SMTP id c14so4722479qvl.12
+ for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:31 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.29
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
- bh=SfDmPYg4RTmB3VAHnPteuLcf45MmDDEEAkNdkij4Il4=;
- b=QVmrOMfiKyGnWnyA+n7ccVQjQfMOponqlNYNpU0b+IqpmZcXhM0BOfHTclXbpLcDJy
- A6yUV9Rt1cKXfytGrkXBhgvBmIaF4sUtdR2BrA233s3MeGREWqJzQZcUzMoYvhCV3Ao9
- KMagnZoo7lSt6aGeJKlX7YqR48IuwmmrVan6NfcM7BPZrc/B8GIIVmlxWdpWL+Yj16gw
- 3kM8WZ4ATRPdO6LinJMWdVOKcL9MzqCO4c0tUhsnN6H9ZWAadMPVsjJXctuo420/k1RH
- xPiNxf7Fb+97cROdE7/sjfQM2NWyx+f0nnbwE41V98H3tminwjZmf63kjSC5dO4LMGLH
- levg==
+ bh=/PP73rDd+L0mrT4S3PimAKm7HxWjvE6hAnQLDLlK/gY=;
+ b=ElVmFkLEnBctqV5khl8L0kSI8JxDzrcCFOs7rTGnO61EfC5WjH3pDfbgkb7XPrAP/y
+ pB1cJsVdWeeGoHvaRRYax+SeEs++Q6bCXPbQIDSBv/5dF7UxLqXUWfsTpyN4QEFiGgvc
+ ixqibrzqGvYR0M03ICzRl385winBN1s4pJ7MsOdEHgwCYRi7w1Ht1AmnEXHMvvJ9sON0
+ DL1jPmJn2WIQ1xF0B+LjA/yQHhdyCQwulI43bhWolXGQCZXLSLxLOHGyZ2fyZ3D0P7Xw
+ wZY6cPYKXpj/jDroBunczb1vYjJhMR8DmfryCBgKUWIQdRXifzfpCiSjkhUbnOSPDFqb
+ FyGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=1e100.net; s=20210112;
  h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
  :references:mime-version:content-transfer-encoding;
- bh=SfDmPYg4RTmB3VAHnPteuLcf45MmDDEEAkNdkij4Il4=;
- b=J9EiFf9uj0pw9stbyVM/SMo3KIGRh+usATnI8mn7ssBHTth3rLogz4DtPj4ktWuMgl
- cQQ8wHG3ajDQrSwrQ5Ty+0pRdpaKUl941nrCHRxdzH1hhAtSnq0UPumnjGcRj0wUAqXa
- EY035qU/vxfEFjxat4nkEcXl7F/SmXpeNqFh7nssOukh3L2vzKViJMzUVtkrReo7xANg
- NAxABaPDydWlUXuOv71dVDvRETH0JjppINlAeiYeFRxMAGZZZHDF7rzMCZ0O6NCrqFpB
- dJ9ev8oEw6+zfjeqBN5rh+0sVC96yRKpsj45tLc+pIUikrxgR7xsB6tvlL9q0pawZ47R
- VFdA==
-X-Gm-Message-State: AOAM531LEowzbksBex+aTHY80vtsh62WuPUZrUzvbplmPrShwGw79lwC
- u5GQAPQ+9HeUty6nr+rA4TSVbLDVba+Klw==
-X-Google-Smtp-Source: ABdhPJyyOxrMj+lufscdAla9Nb2LOQRr+nf3GcGjN29qg6VLvNLJVzIiEzx2L5NytbKh32/3d/4JeQ==
-X-Received: by 2002:a05:6214:5081:: with SMTP id
- kk1mr1390835qvb.112.1644273636010; 
- Mon, 07 Feb 2022 14:40:36 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.34
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:35 -0800 (PST)
+ bh=/PP73rDd+L0mrT4S3PimAKm7HxWjvE6hAnQLDLlK/gY=;
+ b=sjoizp3aueJ2fKZXbZsWdbCKE+euEMaQVzDlopzK/+L0gr3YhSuKWYPiX8/x5kkWbH
+ td3qUR4vuirdS1W0lLZ1bImFag1JwXlNVt53L7J9I60xo1i93IP6oX46AcjCNqjY2M3M
+ L+VscrLPs3p69TaZoG2Q0Sitd9c9MoneZQnYi6ZTcQhJQVs7bMhiF89U/g49QLZ0q02m
+ UjUxGNo7fkiMuAjKWfyZ0eAR1yPx86h+KgsNU+FjUofAI6QsynNlHIDVwew7PcTbb2G+
+ KK8vE5E1rt6wz1AUC6yUR0CccRV7ovjM5jLmBfQ/Sj3wwdIi0ZzkMIPalsPkOjmHKloj
+ dlZw==
+X-Gm-Message-State: AOAM530y8o1qmT5q3+ZCwv1qgpM/S4EVcRz1MObM1fxMqcudyOLnRQjD
+ 90zWND6kprC77RqgFMUSgV09dxs2WOLi3Q==
+X-Google-Smtp-Source: 
+ ABdhPJwucfGT7utyjOp52q2mK3QOGIlbBaxiS9KS5WKV/EdIgcprrlTTwIrN+HYeJdMevVnXrjwr5Q==
+X-Received: by 2002:a05:6214:ca5:: with SMTP id
+ s5mr1357504qvs.35.1644273630832;
+ Mon, 07 Feb 2022 14:40:30 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
-Subject: [PATCH v5 07/11] 9p: darwin: *xattr_nofollow implementations
-Date: Mon,  7 Feb 2022 17:40:20 -0500
-Message-Id: <20220207224024.87745-8-wwcohen@gmail.com>
+Subject: [PATCH v5 03/11] 9p: darwin: Handle struct stat(fs) differences
+Date: Mon,  7 Feb 2022 17:40:16 -0500
+Message-Id: <20220207224024.87745-4-wwcohen@gmail.com>
 X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2b
+Content-Transfer-Encoding: quoted-printable
+X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2f
  (failed)
-Received-SPF: pass client-ip=2607:f8b0:4864:20::f2b;
- envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2b.google.com
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
+Received-SPF: pass client-ip=2607:f8b0:4864:20::f2f;
+ envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2f.google.com
 X-Spam_score_int: -12
 X-Spam_score: -1.3
 X-Spam_bar: -
@@ -1396,127 +493,154 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
  Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
  Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644273875145100001
+Content-Type: text/plain; charset="utf-8"
 
 From: Keno Fischer <keno@juliacomputing.com>
 
-This implements the darwin equivalent of the functions that were
-moved to 9p-util(-linux) earlier in this series in the new
-9p-util-darwin file.
-
 Signed-off-by: Keno Fischer <keno@juliacomputing.com>
-[Michael Roitzsch: - Rebase for NixOS]
 Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
+[Will Cohen: - Note lack of f_namelen and f_frsize on Darwin
+             - Ensure that tv_sec and tv_nsec are both
+               initialized for Darwin and non-Darwin]
 Signed-off-by: Will Cohen <wwcohen@gmail.com>
 ---
- hw/9pfs/9p-util-darwin.c | 64 ++++++++++++++++++++++++++++++++++++++++
- hw/9pfs/meson.build      |  1 +
- 2 files changed, 65 insertions(+)
- create mode 100644 hw/9pfs/9p-util-darwin.c
+ hw/9pfs/9p-proxy.c | 22 ++++++++++++++++++++--
+ hw/9pfs/9p-synth.c |  2 ++
+ hw/9pfs/9p.c       | 16 ++++++++++++++--
+ 3 files changed, 36 insertions(+), 4 deletions(-)
 
-diff --git a/hw/9pfs/9p-util-darwin.c b/hw/9pfs/9p-util-darwin.c
-new file mode 100644
-index 0000000000..cdb4c9e24c
---- /dev/null
-+++ b/hw/9pfs/9p-util-darwin.c
-@@ -0,0 +1,64 @@
-+/*
-+ * 9p utilities (Darwin Implementation)
-+ *
-+ * This work is licensed under the terms of the GNU GPL, version 2 or later.
-+ * See the COPYING file in the top-level directory.
-+ */
-+
-+#include "qemu/osdep.h"
-+#include "qemu/xattr.h"
-+#include "9p-util.h"
-+
-+ssize_t fgetxattrat_nofollow(int dirfd, const char *filename, const char *name,
-+                             void *value, size_t size)
-+{
-+    int ret;
-+    int fd = openat_file(dirfd, filename,
-+                         O_RDONLY | O_PATH_9P_UTIL | O_NOFOLLOW, 0);
-+    if (fd == -1) {
-+        return -1;
-+    }
-+    ret = fgetxattr(fd, name, value, size, 0, 0);
-+    close_preserve_errno(fd);
-+    return ret;
-+}
-+
-+ssize_t flistxattrat_nofollow(int dirfd, const char *filename,
-+                              char *list, size_t size)
-+{
-+    int ret;
-+    int fd = openat_file(dirfd, filename,
-+                         O_RDONLY | O_PATH_9P_UTIL | O_NOFOLLOW, 0);
-+    if (fd == -1) {
-+        return -1;
-+    }
-+    ret = flistxattr(fd, list, size, 0);
-+    close_preserve_errno(fd);
-+    return ret;
-+}
-+
-+ssize_t fremovexattrat_nofollow(int dirfd, const char *filename,
-+                                const char *name)
-+{
-+    int ret;
-+    int fd = openat_file(dirfd, filename, O_PATH_9P_UTIL | O_NOFOLLOW, 0);
-+    if (fd == -1) {
-+        return -1;
-+    }
-+    ret = fremovexattr(fd, name, 0);
-+    close_preserve_errno(fd);
-+    return ret;
-+}
-+
-+int fsetxattrat_nofollow(int dirfd, const char *filename, const char *name,
-+                         void *value, size_t size, int flags)
-+{
-+    int ret;
-+    int fd = openat_file(dirfd, filename, O_PATH_9P_UTIL | O_NOFOLLOW, 0);
-+    if (fd == -1) {
-+        return -1;
-+    }
-+    ret = fsetxattr(fd, name, value, size, 0, flags);
-+    close_preserve_errno(fd);
-+    return ret;
-+}
-diff --git a/hw/9pfs/meson.build b/hw/9pfs/meson.build
-index 1b28e70040..12443b6ad5 100644
---- a/hw/9pfs/meson.build
-+++ b/hw/9pfs/meson.build
-@@ -14,6 +14,7 @@ fs_ss.add(files(
-   'coxattr.c',
- ))
- fs_ss.add(when: 'CONFIG_LINUX', if_true: files('9p-util-linux.c'))
-+fs_ss.add(when: 'CONFIG_DARWIN', if_true: files('9p-util-darwin.c'))
- fs_ss.add(when: 'CONFIG_XEN', if_true: files('xen-9p-backend.c'))
- softmmu_ss.add_all(when: 'CONFIG_FSDEV_9P', if_true: fs_ss)
- 
--- 
+diff --git a/hw/9pfs/9p-proxy.c b/hw/9pfs/9p-proxy.c
+index 09bd9f1464..b1664080d8 100644
+--- a/hw/9pfs/9p-proxy.c
++++ b/hw/9pfs/9p-proxy.c
+@@ -123,10 +123,16 @@ static void prstatfs_to_statfs(struct statfs *stfs, P=
+roxyStatFS *prstfs)
+     stfs->f_bavail =3D prstfs->f_bavail;
+     stfs->f_files =3D prstfs->f_files;
+     stfs->f_ffree =3D prstfs->f_ffree;
++#ifdef CONFIG_DARWIN
++    /* f_namelen and f_frsize do not exist on Darwin */
++    stfs->f_fsid.val[0] =3D prstfs->f_fsid[0] & 0xFFFFFFFFU;
++    stfs->f_fsid.val[1] =3D prstfs->f_fsid[1] >> 32 & 0xFFFFFFFFU;
++#else
+     stfs->f_fsid.__val[0] =3D prstfs->f_fsid[0] & 0xFFFFFFFFU;
+     stfs->f_fsid.__val[1] =3D prstfs->f_fsid[1] >> 32 & 0xFFFFFFFFU;
+     stfs->f_namelen =3D prstfs->f_namelen;
+     stfs->f_frsize =3D prstfs->f_frsize;
++#endif
+ }
+=20
+ /* Converts proxy_stat structure to VFS stat structure */
+@@ -143,12 +149,24 @@ static void prstat_to_stat(struct stat *stbuf, ProxyS=
+tat *prstat)
+    stbuf->st_size =3D prstat->st_size;
+    stbuf->st_blksize =3D prstat->st_blksize;
+    stbuf->st_blocks =3D prstat->st_blocks;
++   stbuf->st_atime =3D prstat->st_atim_sec;
++   stbuf->st_mtime =3D prstat->st_mtim_sec;
++   stbuf->st_ctime =3D prstat->st_ctim_sec;
++#ifdef CONFIG_DARWIN
++   stbuf->st_atimespec.tv_sec =3D prstat->st_atim_sec;
++   stbuf->st_mtimespec.tv_sec =3D prstat->st_mtim_sec;
++   stbuf->st_ctimespec.tv_sec =3D prstat->st_ctim_sec;
++   stbuf->st_atimespec.tv_nsec =3D prstat->st_atim_nsec;
++   stbuf->st_mtimespec.tv_nsec =3D prstat->st_mtim_nsec;
++   stbuf->st_ctimespec.tv_nsec =3D prstat->st_ctim_nsec;
++#else
+    stbuf->st_atim.tv_sec =3D prstat->st_atim_sec;
++   stbuf->st_mtim.tv_sec =3D prstat->st_mtim_sec;
++   stbuf->st_ctim.tv_sec =3D prstat->st_ctim_sec;
+    stbuf->st_atim.tv_nsec =3D prstat->st_atim_nsec;
+-   stbuf->st_mtime =3D prstat->st_mtim_sec;
+    stbuf->st_mtim.tv_nsec =3D prstat->st_mtim_nsec;
+-   stbuf->st_ctime =3D prstat->st_ctim_sec;
+    stbuf->st_ctim.tv_nsec =3D prstat->st_ctim_nsec;
++#endif
+ }
+=20
+ /*
+diff --git a/hw/9pfs/9p-synth.c b/hw/9pfs/9p-synth.c
+index b38088e066..4a4a776d06 100644
+--- a/hw/9pfs/9p-synth.c
++++ b/hw/9pfs/9p-synth.c
+@@ -427,7 +427,9 @@ static int synth_statfs(FsContext *s, V9fsPath *fs_path,
+     stbuf->f_bsize =3D 512;
+     stbuf->f_blocks =3D 0;
+     stbuf->f_files =3D synth_node_count;
++#ifndef CONFIG_DARWIN
+     stbuf->f_namelen =3D NAME_MAX;
++#endif
+     return 0;
+ }
+=20
+diff --git a/hw/9pfs/9p.c b/hw/9pfs/9p.c
+index 9c63e14b28..1563d7b7c6 100644
+--- a/hw/9pfs/9p.c
++++ b/hw/9pfs/9p.c
+@@ -1313,11 +1313,17 @@ static int stat_to_v9stat_dotl(V9fsPDU *pdu, const =
+struct stat *stbuf,
+     v9lstat->st_blksize =3D stat_to_iounit(pdu, stbuf);
+     v9lstat->st_blocks =3D stbuf->st_blocks;
+     v9lstat->st_atime_sec =3D stbuf->st_atime;
+-    v9lstat->st_atime_nsec =3D stbuf->st_atim.tv_nsec;
+     v9lstat->st_mtime_sec =3D stbuf->st_mtime;
+-    v9lstat->st_mtime_nsec =3D stbuf->st_mtim.tv_nsec;
+     v9lstat->st_ctime_sec =3D stbuf->st_ctime;
++#ifdef CONFIG_DARWIN
++    v9lstat->st_atime_nsec =3D stbuf->st_atimespec.tv_nsec;
++    v9lstat->st_mtime_nsec =3D stbuf->st_mtimespec.tv_nsec;
++    v9lstat->st_ctime_nsec =3D stbuf->st_ctimespec.tv_nsec;
++#else
++    v9lstat->st_atime_nsec =3D stbuf->st_atim.tv_nsec;
++    v9lstat->st_mtime_nsec =3D stbuf->st_mtim.tv_nsec;
+     v9lstat->st_ctime_nsec =3D stbuf->st_ctim.tv_nsec;
++#endif
+     /* Currently we only support BASIC fields in stat */
+     v9lstat->st_result_mask =3D P9_STATS_BASIC;
+=20
+@@ -3519,9 +3525,15 @@ static int v9fs_fill_statfs(V9fsState *s, V9fsPDU *p=
+du, struct statfs *stbuf)
+     f_bavail =3D stbuf->f_bavail / bsize_factor;
+     f_files  =3D stbuf->f_files;
+     f_ffree  =3D stbuf->f_ffree;
++#ifdef CONFIG_DARWIN
++    fsid_val =3D (unsigned int)stbuf->f_fsid.val[0] |
++               (unsigned long long)stbuf->f_fsid.val[1] << 32;
++    f_namelen =3D NAME_MAX;
++#else
+     fsid_val =3D (unsigned int) stbuf->f_fsid.__val[0] |
+                (unsigned long long)stbuf->f_fsid.__val[1] << 32;
+     f_namelen =3D stbuf->f_namelen;
++#endif
+=20
+     return pdu_marshal(pdu, offset, "ddqqqqqqd",
+                        f_type, f_bsize, f_blocks, f_bfree,
+--=20
 2.32.0 (Apple Git-132)
 
 
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 98276C433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:52:35 +0000 (UTC)
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274359160285.60451877676735;
+ Mon, 7 Feb 2022 14:52:39 -0800 (PST)
 Received: from localhost ([::1]:59480 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCs6-0005LY-Ca
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:52:34 -0500
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCsA-0005LY-38
+	for importer@patchew.org; Mon, 07 Feb 2022 17:52:38 -0500
 Received: from eggs.gnu.org ([209.51.188.92]:33246)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
  (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgc-0003vh-98
@@ -1528,6 +652,12 @@ Received: from [2607:f8b0:4864:20::f33] (port=47013
  for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:39 -0500
 Received: by mail-qv1-xf33.google.com with SMTP id n6so4327241qvk.13
  for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:33 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.30
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
@@ -1551,16 +681,11 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  KB8g==
 X-Gm-Message-State: AOAM533j6qHIe0jx1UT9wqLUt/FIvLOeLQrJ6iLpkQmxSq7BBqY/aueC
  KDX6VsPE6PFk/hq8OyT/EaiMvgSTiqLyuA==
-X-Google-Smtp-Source: ABdhPJxCI06K0s7pknY8XxPnRLSjiyS4LOS38Iaeam2xaQ2pCD8zA3+iyRa+j+DnnBTCgTOmElzn2A==
+X-Google-Smtp-Source: 
+ ABdhPJxCI06K0s7pknY8XxPnRLSjiyS4LOS38Iaeam2xaQ2pCD8zA3+iyRa+j+DnnBTCgTOmElzn2A==
 X-Received: by 2002:a05:6214:2a8e:: with SMTP id
- jr14mr1239957qvb.74.1644273632139; 
+ jr14mr1239957qvb.74.1644273632139;
  Mon, 07 Feb 2022 14:40:32 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.30
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:31 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
 Subject: [PATCH v5 04/11] 9p: darwin: Handle struct dirent differences
@@ -1570,9 +695,13 @@ X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f33
  (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
 Received-SPF: pass client-ip=2607:f8b0:4864:20::f33;
  envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf33.google.com
 X-Spam_score_int: -12
@@ -1601,9 +730,11 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
  Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
  Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274359980100001
+Content-Type: text/plain; charset="utf-8"
 
 From: Keno Fischer <keno@juliacomputing.com>
 
@@ -1648,42 +779,43 @@ index 1a5e3eed73..f3272f0b43 100644
      }
 +#ifdef CONFIG_DARWIN
 +    int off;
-+    off = telldir(fs->dir.stream);
++    off =3D telldir(fs->dir.stream);
 +    /* If telldir fails, fail the entire readdir call */
 +    if (off < 0) {
 +        return NULL;
 +    }
-+    entry->d_seekoff = off;
++    entry->d_seekoff =3D off;
 +#endif
- 
+=20
      if (ctx->export_flags & V9FS_SM_MAPPED) {
-         entry->d_type = DT_UNKNOWN;
+         entry->d_type =3D DT_UNKNOWN;
 diff --git a/hw/9pfs/9p-proxy.c b/hw/9pfs/9p-proxy.c
 index b1664080d8..8b4b5cf7dc 100644
 --- a/hw/9pfs/9p-proxy.c
 +++ b/hw/9pfs/9p-proxy.c
-@@ -706,7 +706,21 @@ static off_t proxy_telldir(FsContext *ctx, V9fsFidOpenState *fs)
- 
+@@ -706,7 +706,21 @@ static off_t proxy_telldir(FsContext *ctx, V9fsFidOpen=
+State *fs)
+=20
  static struct dirent *proxy_readdir(FsContext *ctx, V9fsFidOpenState *fs)
  {
 -    return readdir(fs->dir.stream);
 +    struct dirent *entry;
-+    entry = readdir(fs->dir.stream);
++    entry =3D readdir(fs->dir.stream);
 +#ifdef CONFIG_DARWIN
 +    if (!entry) {
 +        return NULL;
 +    }
 +    int td;
-+    td = telldir(fs->dir.stream);
++    td =3D telldir(fs->dir.stream);
 +    /* If telldir fails, fail the entire readdir call */
 +    if (td < 0) {
 +        return NULL;
 +    }
-+    entry->d_seekoff = td;
++    entry->d_seekoff =3D td;
 +#endif
 +    return entry;
  }
- 
+=20
  static void proxy_seekdir(FsContext *ctx, V9fsFidOpenState *fs, off_t off)
 diff --git a/hw/9pfs/9p-synth.c b/hw/9pfs/9p-synth.c
 index 4a4a776d06..e264a03eef 100644
@@ -1692,22 +824,23 @@ index 4a4a776d06..e264a03eef 100644
 @@ -222,7 +222,11 @@ static void synth_direntry(V9fsSynthNode *node,
  {
      strcpy(entry->d_name, node->name);
-     entry->d_ino = node->attr->inode;
+     entry->d_ino =3D node->attr->inode;
 +#ifdef CONFIG_DARWIN
-+    entry->d_seekoff = off + 1;
++    entry->d_seekoff =3D off + 1;
 +#else
-     entry->d_off = off + 1;
+     entry->d_off =3D off + 1;
 +#endif
  }
- 
+=20
  static struct dirent *synth_get_dentry(V9fsSynthNode *dir,
 diff --git a/hw/9pfs/9p-util.h b/hw/9pfs/9p-util.h
 index 546f46dc7d..d41f37f085 100644
 --- a/hw/9pfs/9p-util.h
 +++ b/hw/9pfs/9p-util.h
-@@ -79,3 +79,19 @@ ssize_t fremovexattrat_nofollow(int dirfd, const char *filename,
+@@ -79,3 +79,19 @@ ssize_t fremovexattrat_nofollow(int dirfd, const char *f=
+ilename,
                                  const char *name);
- 
+=20
  #endif
 +
 +
@@ -1737,37 +870,41 @@ index 1563d7b7c6..caf3b240fe 100644
  #include "coth.h"
  #include "trace.h"
  #include "migration/blocker.h"
-@@ -2281,7 +2282,7 @@ static int coroutine_fn v9fs_do_readdir_with_stat(V9fsPDU *pdu,
-         count += len;
+@@ -2281,7 +2282,7 @@ static int coroutine_fn v9fs_do_readdir_with_stat(V9f=
+sPDU *pdu,
+         count +=3D len;
          v9fs_stat_free(&v9stat);
          v9fs_path_free(&path);
--        saved_dir_pos = dent->d_off;
-+        saved_dir_pos = qemu_dirent_off(dent);
+-        saved_dir_pos =3D dent->d_off;
++        saved_dir_pos =3D qemu_dirent_off(dent);
      }
- 
+=20
      v9fs_readdir_unlock(&fidp->fs.dir);
-@@ -2420,6 +2421,7 @@ static int coroutine_fn v9fs_do_readdir(V9fsPDU *pdu, V9fsFidState *fidp,
+@@ -2420,6 +2421,7 @@ static int coroutine_fn v9fs_do_readdir(V9fsPDU *pdu,=
+ V9fsFidState *fidp,
      V9fsString name;
-     int len, err = 0;
-     int32_t count = 0;
+     int len, err =3D 0;
+     int32_t count =3D 0;
 +    off_t off;
      struct dirent *dent;
      struct stat *st;
-     struct V9fsDirEnt *entries = NULL;
-@@ -2480,12 +2482,13 @@ static int coroutine_fn v9fs_do_readdir(V9fsPDU *pdu, V9fsFidState *fidp,
-             qid.version = 0;
+     struct V9fsDirEnt *entries =3D NULL;
+@@ -2480,12 +2482,13 @@ static int coroutine_fn v9fs_do_readdir(V9fsPDU *pd=
+u, V9fsFidState *fidp,
+             qid.version =3D 0;
          }
- 
-+        off = qemu_dirent_off(dent);
+=20
++        off =3D qemu_dirent_off(dent);
          v9fs_string_init(&name);
          v9fs_string_sprintf(&name, "%s", dent->d_name);
- 
-         /* 11 = 7 + 4 (7 = start offset, 4 = space for storing count) */
-         len = pdu_marshal(pdu, 11 + count, "Qqbs",
+=20
+         /* 11 =3D 7 + 4 (7 =3D start offset, 4 =3D space for storing count=
+) */
+         len =3D pdu_marshal(pdu, 11 + count, "Qqbs",
 -                          &qid, dent->d_off,
 +                          &qid, off,
                            dent->d_type, &name);
- 
+=20
          v9fs_string_free(&name);
 diff --git a/hw/9pfs/codir.c b/hw/9pfs/codir.c
 index 032cce04c4..8e66205d9d 100644
@@ -1779,37 +916,235 @@ index 032cce04c4..8e66205d9d 100644
  #include "coth.h"
 +#include "9p-xattr.h"
 +#include "9p-util.h"
- 
+=20
  /*
   * Intended to be called from bottom-half (e.g. background I/O thread)
-@@ -167,7 +169,7 @@ static int do_readdir_many(V9fsPDU *pdu, V9fsFidState *fidp,
+@@ -167,7 +169,7 @@ static int do_readdir_many(V9fsPDU *pdu, V9fsFidState *=
+fidp,
          }
- 
-         size += len;
--        saved_dir_pos = dent->d_off;
-+        saved_dir_pos = qemu_dirent_off(dent);
+=20
+         size +=3D len;
+-        saved_dir_pos =3D dent->d_off;
++        saved_dir_pos =3D qemu_dirent_off(dent);
      }
- 
+=20
      /* restore (last) saved position */
--- 
+--=20
 2.32.0 (Apple Git-132)
 
 
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274072780259.35379929292105;
+ Mon, 7 Feb 2022 14:47:52 -0800 (PST)
+Received: from localhost ([::1]:49940 helo=lists1p.gnu.org)
+	by lists.gnu.org with esmtp (Exim 4.90_1)
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCnX-00074h-QM
+	for importer@patchew.org; Mon, 07 Feb 2022 17:47:51 -0500
+Received: from eggs.gnu.org ([209.51.188.92]:33244)
+ by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgc-0003vg-8i
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:42 -0500
+Received: from [2607:f8b0:4864:20::732] (port=46797
+ helo=mail-qk1-x732.google.com)
+ by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgW-0005hH-Cl
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:39 -0500
+Received: by mail-qk1-x732.google.com with SMTP id 13so12259569qkd.13
+ for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:34 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.32
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
+ h=from:to:cc:subject:date:message-id:in-reply-to:references
+ :mime-version:content-transfer-encoding;
+ bh=Dr/feHt4CQ3Ov1Gcud59/VipBt/NIJFjtcf+1R8zrqc=;
+ b=EmYrCzq6SXjWv2/dve4ohc6EBt4RJOCnTXj3/fy25qtig6EdL9KQpkeidPWKdWu09w
+ Fs2cd+EOLppsPA686I6LU0z2t6yA147Bo0Q4yLO8FTEFAVm93eDDS6dWw0WCqsHvdjnF
+ 8MqE90IltGrJDVytZcvlw4Q3X6/LwqbvsQ1w1r2P4lnYZwkq5ZdurxmtLiaWj1Mjy430
+ i27YobV7WzTUeJo7O20j+m6BTipmImh/T0YuOcp5KFMkE4mi8rrWx1nlsUzo3fE+CwIa
+ BX511P4ylBl/21NnjZaBiXeexib4DCbYdQqLK2rL1Po+eeu53Tk4QafE1vqpPZUQyCXN
+ 85BQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20210112;
+ h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+ :references:mime-version:content-transfer-encoding;
+ bh=Dr/feHt4CQ3Ov1Gcud59/VipBt/NIJFjtcf+1R8zrqc=;
+ b=PuADk/eze+DYlT2dsh0NaHGC8XlKDOzQfjifd7OF2hpPyqbU9t8hW9Zhyw1aVX4Gkh
+ XeMAqyqzitcE7QdnFubSODquJvjkFM5GHQ4tpfFRfm+Q7BYI+p8/XcnYSl12dIt+QHHD
+ MiN6diPTvrAhIjyb8I/+EaaSx7ubs/mxG5mcEDYKasBn2Dkbqq3pAmIvyHmUnxfckwVc
+ CJrP7spV+b9W6PrTCCtuUMlhcSknF/IVJgnVCjbExAu4Ka7TMh12BUlLfvEqz91aqkHo
+ YYucNtVWbtnKiTYP7+TOVaGl0S+f01xvB3ytgoMUOQp0KrhFNlDYhVIdE79j2Kt9A3gT
+ X0Ug==
+X-Gm-Message-State: AOAM533fUdWUthO1cAUoksZTM0fYJRIE2o/cbwik7aXXVs8weKwudg/F
+ c2hXoDjB5cXzYbtffvRzAYRjasr2f+e45Q==
+X-Google-Smtp-Source: 
+ ABdhPJx65r74g96zCyWBSvpI4ySSAU6O51L0crXDJ36dwrAZSAIXabyeIxgtW+ubz46awroGBMOINw==
+X-Received: by 2002:a37:aac9:: with SMTP id t192mr1225160qke.32.1644273633471;
+ Mon, 07 Feb 2022 14:40:33 -0800 (PST)
+From: Will Cohen <wwcohen@gmail.com>
+To: qemu-devel@nongnu.org
+Subject: [PATCH v5 05/11] 9p: darwin: Ignore O_{NOATIME, DIRECT}
+Date: Mon,  7 Feb 2022 17:40:18 -0500
+Message-Id: <20220207224024.87745-6-wwcohen@gmail.com>
+X-Mailer: git-send-email 2.32.0 (Apple Git-132)
+In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
+References: <20220207224024.87745-1-wwcohen@gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::732
+ (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
+Received-SPF: pass client-ip=2607:f8b0:4864:20::732;
+ envelope-from=wwcohen@gmail.com; helo=mail-qk1-x732.google.com
+X-Spam_score_int: -12
+X-Spam_score: -1.3
+X-Spam_bar: -
+X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
+ DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
+ PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
+ SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
+ T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
+X-Spam_action: no action
+X-BeenThere: qemu-devel@nongnu.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: <qemu-devel.nongnu.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+ <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+ <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
+ Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
+ hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
+ Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
+ Keno Fischer <keno@juliacomputing.com>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274075039100001
+Content-Type: text/plain; charset="utf-8"
 
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id AEB06C433EF
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:56:10 +0000 (UTC)
+From: Keno Fischer <keno@juliacomputing.com>
+
+Darwin doesn't have either of these flags. Darwin does have
+F_NOCACHE, which is similar to O_DIRECT, but has different
+enough semantics that other projects don't generally map
+them automatically. In any case, we don't support O_DIRECT
+on Linux at the moment either.
+
+Signed-off-by: Keno Fischer <keno@juliacomputing.com>
+[Michael Roitzsch: - Rebase for NixOS]
+Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
+[Will Cohen: - Adjust coding style]
+Signed-off-by: Will Cohen <wwcohen@gmail.com>
+---
+ hw/9pfs/9p-util.h |  2 ++
+ hw/9pfs/9p.c      | 13 ++++++++++++-
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/hw/9pfs/9p-util.h b/hw/9pfs/9p-util.h
+index d41f37f085..0e445b5d52 100644
+--- a/hw/9pfs/9p-util.h
++++ b/hw/9pfs/9p-util.h
+@@ -41,6 +41,7 @@ again:
+     fd =3D openat(dirfd, name, flags | O_NOFOLLOW | O_NOCTTY | O_NONBLOCK,
+                 mode);
+     if (fd =3D=3D -1) {
++#ifndef CONFIG_DARWIN
+         if (errno =3D=3D EPERM && (flags & O_NOATIME)) {
+             /*
+              * The client passed O_NOATIME but we lack permissions to hono=
+r it.
+@@ -53,6 +54,7 @@ again:
+             flags &=3D ~O_NOATIME;
+             goto again;
+         }
++#endif
+         return -1;
+     }
+=20
+diff --git a/hw/9pfs/9p.c b/hw/9pfs/9p.c
+index caf3b240fe..14e84c3bcf 100644
+--- a/hw/9pfs/9p.c
++++ b/hw/9pfs/9p.c
+@@ -138,11 +138,20 @@ static int dotl_to_open_flags(int flags)
+         { P9_DOTL_NONBLOCK, O_NONBLOCK } ,
+         { P9_DOTL_DSYNC, O_DSYNC },
+         { P9_DOTL_FASYNC, FASYNC },
++#ifndef CONFIG_DARWIN
++        { P9_DOTL_NOATIME, O_NOATIME },
++        /*
++         *  On Darwin, we could map to F_NOCACHE, which is
++         *  similar, but doesn't quite have the same
++         *  semantics. However, we don't support O_DIRECT
++         *  even on linux at the moment, so we just ignore
++         *  it here.
++         */
+         { P9_DOTL_DIRECT, O_DIRECT },
++#endif
+         { P9_DOTL_LARGEFILE, O_LARGEFILE },
+         { P9_DOTL_DIRECTORY, O_DIRECTORY },
+         { P9_DOTL_NOFOLLOW, O_NOFOLLOW },
+-        { P9_DOTL_NOATIME, O_NOATIME },
+         { P9_DOTL_SYNC, O_SYNC },
+     };
+=20
+@@ -171,10 +180,12 @@ static int get_dotl_openflags(V9fsState *s, int oflag=
+s)
+      */
+     flags =3D dotl_to_open_flags(oflags);
+     flags &=3D ~(O_NOCTTY | O_ASYNC | O_CREAT);
++#ifndef CONFIG_DARWIN
+     /*
+      * Ignore direct disk access hint until the server supports it.
+      */
+     flags &=3D ~O_DIRECT;
++#endif
+     return flags;
+ }
+=20
+--=20
+2.32.0 (Apple Git-132)
+
+
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274573694627.8726073475352;
+ Mon, 7 Feb 2022 14:56:13 -0800 (PST)
 Received: from localhost ([::1]:35252 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCvZ-000854-HI
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:56:09 -0500
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCvc-000854-Lb
+	for importer@patchew.org; Mon, 07 Feb 2022 17:56:12 -0500
 Received: from eggs.gnu.org ([209.51.188.92]:33240)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
  (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgc-0003va-8p
@@ -1821,6 +1156,12 @@ Received: from [2607:f8b0:4864:20::834] (port=38820
  for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:39 -0500
 Received: by mail-qt1-x834.google.com with SMTP id r14so13314143qtt.5
  for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:35 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.33
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
@@ -1844,14 +1185,9 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  k0uA==
 X-Gm-Message-State: AOAM5302PSd1tLTv1I94ghN7IceOu8p6pbAA/7STvjqVf5Y+Ok9Z/G3X
  SAUoUCHBrzZoh4uyg80h/rvfN7u8xJVC/w==
-X-Google-Smtp-Source: ABdhPJwfFzo3UWDN9c/a9IUqjv1z0I5YK0ndZuxHN3ketazcQp9xiNWGA+etGaMgyvG/ay5HJI91cQ==
-X-Received: by 2002:ac8:5413:: with SMTP id b19mr1269340qtq.442.1644273634733; 
- Mon, 07 Feb 2022 14:40:34 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.33
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+X-Google-Smtp-Source: 
+ ABdhPJwfFzo3UWDN9c/a9IUqjv1z0I5YK0ndZuxHN3ketazcQp9xiNWGA+etGaMgyvG/ay5HJI91cQ==
+X-Received: by 2002:ac8:5413:: with SMTP id b19mr1269340qtq.442.1644273634733;
  Mon, 07 Feb 2022 14:40:34 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
@@ -1862,9 +1198,13 @@ X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::834
  (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
 Received-SPF: pass client-ip=2607:f8b0:4864:20::834;
  envelope-from=wwcohen@gmail.com; helo=mail-qt1-x834.google.com
 X-Spam_score_int: -12
@@ -1893,9 +1233,11 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
  Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
  Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274574686100001
+Content-Type: text/plain; charset="utf-8"
 
 From: Keno Fischer <keno@juliacomputing.com>
 
@@ -1921,13 +1263,14 @@ diff --git a/hw/9pfs/9p.c b/hw/9pfs/9p.c
 index 14e84c3bcf..7405352c37 100644
 --- a/hw/9pfs/9p.c
 +++ b/hw/9pfs/9p.c
-@@ -3949,7 +3949,7 @@ static void coroutine_fn v9fs_xattrcreate(void *opaque)
-         rflags |= XATTR_REPLACE;
+@@ -3949,7 +3949,7 @@ static void coroutine_fn v9fs_xattrcreate(void *opaqu=
+e)
+         rflags |=3D XATTR_REPLACE;
      }
- 
+=20
 -    if (size > XATTR_SIZE_MAX) {
 +    if (size > P9_XATTR_SIZE_MAX) {
-         err = -E2BIG;
+         err =3D -E2BIG;
          goto out_nofid;
      }
 diff --git a/hw/9pfs/9p.h b/hw/9pfs/9p.h
@@ -1937,38 +1280,260 @@ index 1567b67841..6a1856b4dc 100644
 @@ -479,4 +479,15 @@ struct V9fsTransport {
      void        (*push_and_notify)(V9fsPDU *pdu);
  };
- 
+=20
 +/*
 + * Darwin doesn't seem to define a maximum xattr size in its user
 + * space header, so manually configure it across platforms as 64k.
 + *
 + * Having no limit at all can lead to QEMU crashing during large g_malloc()
 + * calls. Because QEMU does not currently support macOS guests, the below
-+ * preliminary solution only works due to its being a reflection of the limit of
++ * preliminary solution only works due to its being a reflection of the li=
+mit of
 + * Linux guests.
 + */
 +#define P9_XATTR_SIZE_MAX 65536
 +
  #endif
--- 
+--=20
 2.32.0 (Apple Git-132)
 
 
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274300536600.5031147090684;
+ Mon, 7 Feb 2022 14:51:40 -0800 (PST)
+Received: from localhost ([::1]:57006 helo=lists1p.gnu.org)
+	by lists.gnu.org with esmtp (Exim 4.90_1)
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCrD-0003fa-GJ
+	for importer@patchew.org; Mon, 07 Feb 2022 17:51:39 -0500
+Received: from eggs.gnu.org ([209.51.188.92]:33242)
+ by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgc-0003vf-7j
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:42 -0500
+Received: from [2607:f8b0:4864:20::f2b] (port=42745
+ helo=mail-qv1-xf2b.google.com)
+ by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgX-0005ih-VM
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:40 -0500
+Received: by mail-qv1-xf2b.google.com with SMTP id k9so12607540qvv.9
+ for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:36 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.34
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
+ h=from:to:cc:subject:date:message-id:in-reply-to:references
+ :mime-version:content-transfer-encoding;
+ bh=SfDmPYg4RTmB3VAHnPteuLcf45MmDDEEAkNdkij4Il4=;
+ b=QVmrOMfiKyGnWnyA+n7ccVQjQfMOponqlNYNpU0b+IqpmZcXhM0BOfHTclXbpLcDJy
+ A6yUV9Rt1cKXfytGrkXBhgvBmIaF4sUtdR2BrA233s3MeGREWqJzQZcUzMoYvhCV3Ao9
+ KMagnZoo7lSt6aGeJKlX7YqR48IuwmmrVan6NfcM7BPZrc/B8GIIVmlxWdpWL+Yj16gw
+ 3kM8WZ4ATRPdO6LinJMWdVOKcL9MzqCO4c0tUhsnN6H9ZWAadMPVsjJXctuo420/k1RH
+ xPiNxf7Fb+97cROdE7/sjfQM2NWyx+f0nnbwE41V98H3tminwjZmf63kjSC5dO4LMGLH
+ levg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20210112;
+ h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+ :references:mime-version:content-transfer-encoding;
+ bh=SfDmPYg4RTmB3VAHnPteuLcf45MmDDEEAkNdkij4Il4=;
+ b=J9EiFf9uj0pw9stbyVM/SMo3KIGRh+usATnI8mn7ssBHTth3rLogz4DtPj4ktWuMgl
+ cQQ8wHG3ajDQrSwrQ5Ty+0pRdpaKUl941nrCHRxdzH1hhAtSnq0UPumnjGcRj0wUAqXa
+ EY035qU/vxfEFjxat4nkEcXl7F/SmXpeNqFh7nssOukh3L2vzKViJMzUVtkrReo7xANg
+ NAxABaPDydWlUXuOv71dVDvRETH0JjppINlAeiYeFRxMAGZZZHDF7rzMCZ0O6NCrqFpB
+ dJ9ev8oEw6+zfjeqBN5rh+0sVC96yRKpsj45tLc+pIUikrxgR7xsB6tvlL9q0pawZ47R
+ VFdA==
+X-Gm-Message-State: AOAM531LEowzbksBex+aTHY80vtsh62WuPUZrUzvbplmPrShwGw79lwC
+ u5GQAPQ+9HeUty6nr+rA4TSVbLDVba+Klw==
+X-Google-Smtp-Source: 
+ ABdhPJyyOxrMj+lufscdAla9Nb2LOQRr+nf3GcGjN29qg6VLvNLJVzIiEzx2L5NytbKh32/3d/4JeQ==
+X-Received: by 2002:a05:6214:5081:: with SMTP id
+ kk1mr1390835qvb.112.1644273636010;
+ Mon, 07 Feb 2022 14:40:36 -0800 (PST)
+From: Will Cohen <wwcohen@gmail.com>
+To: qemu-devel@nongnu.org
+Subject: [PATCH v5 07/11] 9p: darwin: *xattr_nofollow implementations
+Date: Mon,  7 Feb 2022 17:40:20 -0500
+Message-Id: <20220207224024.87745-8-wwcohen@gmail.com>
+X-Mailer: git-send-email 2.32.0 (Apple Git-132)
+In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
+References: <20220207224024.87745-1-wwcohen@gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2b
+ (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
+Received-SPF: pass client-ip=2607:f8b0:4864:20::f2b;
+ envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2b.google.com
+X-Spam_score_int: -12
+X-Spam_score: -1.3
+X-Spam_bar: -
+X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
+ DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
+ PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
+ SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
+ T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
+X-Spam_action: no action
+X-BeenThere: qemu-devel@nongnu.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: <qemu-devel.nongnu.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+ <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+ <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
+ Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
+ hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
+ Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
+ Keno Fischer <keno@juliacomputing.com>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274301926100001
+Content-Type: text/plain; charset="utf-8"
 
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id E12E4C433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 22:58:35 +0000 (UTC)
+From: Keno Fischer <keno@juliacomputing.com>
+
+This implements the darwin equivalent of the functions that were
+moved to 9p-util(-linux) earlier in this series in the new
+9p-util-darwin file.
+
+Signed-off-by: Keno Fischer <keno@juliacomputing.com>
+[Michael Roitzsch: - Rebase for NixOS]
+Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
+Signed-off-by: Will Cohen <wwcohen@gmail.com>
+---
+ hw/9pfs/9p-util-darwin.c | 64 ++++++++++++++++++++++++++++++++++++++++
+ hw/9pfs/meson.build      |  1 +
+ 2 files changed, 65 insertions(+)
+ create mode 100644 hw/9pfs/9p-util-darwin.c
+
+diff --git a/hw/9pfs/9p-util-darwin.c b/hw/9pfs/9p-util-darwin.c
+new file mode 100644
+index 0000000000..cdb4c9e24c
+--- /dev/null
++++ b/hw/9pfs/9p-util-darwin.c
+@@ -0,0 +1,64 @@
++/*
++ * 9p utilities (Darwin Implementation)
++ *
++ * This work is licensed under the terms of the GNU GPL, version 2 or late=
+r.
++ * See the COPYING file in the top-level directory.
++ */
++
++#include "qemu/osdep.h"
++#include "qemu/xattr.h"
++#include "9p-util.h"
++
++ssize_t fgetxattrat_nofollow(int dirfd, const char *filename, const char *=
+name,
++                             void *value, size_t size)
++{
++    int ret;
++    int fd =3D openat_file(dirfd, filename,
++                         O_RDONLY | O_PATH_9P_UTIL | O_NOFOLLOW, 0);
++    if (fd =3D=3D -1) {
++        return -1;
++    }
++    ret =3D fgetxattr(fd, name, value, size, 0, 0);
++    close_preserve_errno(fd);
++    return ret;
++}
++
++ssize_t flistxattrat_nofollow(int dirfd, const char *filename,
++                              char *list, size_t size)
++{
++    int ret;
++    int fd =3D openat_file(dirfd, filename,
++                         O_RDONLY | O_PATH_9P_UTIL | O_NOFOLLOW, 0);
++    if (fd =3D=3D -1) {
++        return -1;
++    }
++    ret =3D flistxattr(fd, list, size, 0);
++    close_preserve_errno(fd);
++    return ret;
++}
++
++ssize_t fremovexattrat_nofollow(int dirfd, const char *filename,
++                                const char *name)
++{
++    int ret;
++    int fd =3D openat_file(dirfd, filename, O_PATH_9P_UTIL | O_NOFOLLOW, 0=
+);
++    if (fd =3D=3D -1) {
++        return -1;
++    }
++    ret =3D fremovexattr(fd, name, 0);
++    close_preserve_errno(fd);
++    return ret;
++}
++
++int fsetxattrat_nofollow(int dirfd, const char *filename, const char *name,
++                         void *value, size_t size, int flags)
++{
++    int ret;
++    int fd =3D openat_file(dirfd, filename, O_PATH_9P_UTIL | O_NOFOLLOW, 0=
+);
++    if (fd =3D=3D -1) {
++        return -1;
++    }
++    ret =3D fsetxattr(fd, name, value, size, 0, flags);
++    close_preserve_errno(fd);
++    return ret;
++}
+diff --git a/hw/9pfs/meson.build b/hw/9pfs/meson.build
+index 1b28e70040..12443b6ad5 100644
+--- a/hw/9pfs/meson.build
++++ b/hw/9pfs/meson.build
+@@ -14,6 +14,7 @@ fs_ss.add(files(
+   'coxattr.c',
+ ))
+ fs_ss.add(when: 'CONFIG_LINUX', if_true: files('9p-util-linux.c'))
++fs_ss.add(when: 'CONFIG_DARWIN', if_true: files('9p-util-darwin.c'))
+ fs_ss.add(when: 'CONFIG_XEN', if_true: files('xen-9p-backend.c'))
+ softmmu_ss.add_all(when: 'CONFIG_FSDEV_9P', if_true: fs_ss)
+=20
+--=20
+2.32.0 (Apple Git-132)
+
+
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644274726680617.7316142259348;
+ Mon, 7 Feb 2022 14:58:46 -0800 (PST)
 Received: from localhost ([::1]:41360 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHCxu-0003xQ-Vq
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 17:58:35 -0500
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCy3-0003xQ-RT
+	for importer@patchew.org; Mon, 07 Feb 2022 17:58:45 -0500
 Received: from eggs.gnu.org ([209.51.188.92]:33288)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
  (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgd-0003xt-V9
@@ -1980,6 +1545,12 @@ Received: from [2607:f8b0:4864:20::f30] (port=43837
  for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:42 -0500
 Received: by mail-qv1-xf30.google.com with SMTP id a28so5461042qvb.10
  for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:38 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.36
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
@@ -2003,16 +1574,11 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  gyPg==
 X-Gm-Message-State: AOAM532r9Mp0nMqTjBvZycIdy2jrLC7tugMxZ6S9BFa4dfg97aLhRtEq
  EqgPDYJNH0Y8xi8Jo8+ILcPqYmGzk+H4QA==
-X-Google-Smtp-Source: ABdhPJzw2J5bEUG1yMzaJ5jnUeUfnjcz/B5Y7SL+UB4umZaulXAFqDBbJWCSrOu57KslvojMaAa3KQ==
+X-Google-Smtp-Source: 
+ ABdhPJzw2J5bEUG1yMzaJ5jnUeUfnjcz/B5Y7SL+UB4umZaulXAFqDBbJWCSrOu57KslvojMaAa3KQ==
 X-Received: by 2002:a05:6214:19c7:: with SMTP id
- j7mr1380925qvc.71.1644273637370; 
+ j7mr1380925qvc.71.1644273637370;
  Mon, 07 Feb 2022 14:40:37 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.36
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:36 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
 Subject: [PATCH v5 08/11] 9p: darwin: Compatibility for f/l*xattr
@@ -2022,9 +1588,13 @@ X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f30
  (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
 Received-SPF: pass client-ip=2607:f8b0:4864:20::f30;
  envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf30.google.com
 X-Spam_score_int: -12
@@ -2052,9 +1622,11 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
  Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
  Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644274729046100001
+Content-Type: text/plain; charset="utf-8"
 
 From: Keno Fischer <keno@juliacomputing.com>
 
@@ -2075,29 +1647,34 @@ diff --git a/hw/9pfs/9p-local.c b/hw/9pfs/9p-local.c
 index f3272f0b43..a0d08e5216 100644
 --- a/hw/9pfs/9p-local.c
 +++ b/hw/9pfs/9p-local.c
-@@ -790,16 +790,20 @@ static int local_fstat(FsContext *fs_ctx, int fid_type,
+@@ -790,16 +790,20 @@ static int local_fstat(FsContext *fs_ctx, int fid_typ=
+e,
          mode_t tmp_mode;
          dev_t tmp_dev;
- 
--        if (fgetxattr(fd, "user.virtfs.uid", &tmp_uid, sizeof(uid_t)) > 0) {
+=20
+-        if (fgetxattr(fd, "user.virtfs.uid", &tmp_uid, sizeof(uid_t)) > 0)=
+ {
 +        if (qemu_fgetxattr(fd, "user.virtfs.uid",
 +                           &tmp_uid, sizeof(uid_t)) > 0) {
-             stbuf->st_uid = le32_to_cpu(tmp_uid);
+             stbuf->st_uid =3D le32_to_cpu(tmp_uid);
          }
--        if (fgetxattr(fd, "user.virtfs.gid", &tmp_gid, sizeof(gid_t)) > 0) {
+-        if (fgetxattr(fd, "user.virtfs.gid", &tmp_gid, sizeof(gid_t)) > 0)=
+ {
 +        if (qemu_fgetxattr(fd, "user.virtfs.gid",
 +                           &tmp_gid, sizeof(gid_t)) > 0) {
-             stbuf->st_gid = le32_to_cpu(tmp_gid);
+             stbuf->st_gid =3D le32_to_cpu(tmp_gid);
          }
--        if (fgetxattr(fd, "user.virtfs.mode", &tmp_mode, sizeof(mode_t)) > 0) {
+-        if (fgetxattr(fd, "user.virtfs.mode", &tmp_mode, sizeof(mode_t)) >=
+ 0) {
 +        if (qemu_fgetxattr(fd, "user.virtfs.mode",
 +                           &tmp_mode, sizeof(mode_t)) > 0) {
-             stbuf->st_mode = le32_to_cpu(tmp_mode);
+             stbuf->st_mode =3D le32_to_cpu(tmp_mode);
          }
--        if (fgetxattr(fd, "user.virtfs.rdev", &tmp_dev, sizeof(dev_t)) > 0) {
+-        if (fgetxattr(fd, "user.virtfs.rdev", &tmp_dev, sizeof(dev_t)) > 0=
+) {
 +        if (qemu_fgetxattr(fd, "user.virtfs.rdev",
 +                           &tmp_dev, sizeof(dev_t)) > 0) {
-             stbuf->st_rdev = le64_to_cpu(tmp_dev);
+             stbuf->st_rdev =3D le64_to_cpu(tmp_dev);
          }
      } else if (fs_ctx->export_flags & V9FS_SM_MAPPED_FILE) {
 diff --git a/hw/9pfs/9p-util.h b/hw/9pfs/9p-util.h
@@ -2107,14 +1684,15 @@ index 0e445b5d52..82399702b9 100644
 @@ -19,6 +19,23 @@
  #define O_PATH_9P_UTIL 0
  #endif
- 
+=20
 +#ifdef CONFIG_DARWIN
 +#define qemu_fgetxattr(...) fgetxattr(__VA_ARGS__, 0, 0)
 +#define qemu_lgetxattr(...) getxattr(__VA_ARGS__, 0, XATTR_NOFOLLOW)
 +#define qemu_llistxattr(...) listxattr(__VA_ARGS__, XATTR_NOFOLLOW)
 +#define qemu_lremovexattr(...) removexattr(__VA_ARGS__, XATTR_NOFOLLOW)
 +static inline int qemu_lsetxattr(const char *path, const char *name,
-+                                 const void *value, size_t size, int flags) {
++                                 const void *value, size_t size, int flags=
+) {
 +    return setxattr(path, name, value, size, 0, flags | XATTR_NOFOLLOW);
 +}
 +#else
@@ -2127,73 +1705,100 @@ index 0e445b5d52..82399702b9 100644
 +
  static inline void close_preserve_errno(int fd)
  {
-     int serrno = errno;
--- 
+     int serrno =3D errno;
+--=20
 2.32.0 (Apple Git-132)
 
 
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id 7E872C433F5
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 23:03:12 +0000 (UTC)
-Received: from localhost ([::1]:45694 helo=lists1p.gnu.org)
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644273797659160.55510944114337;
+ Mon, 7 Feb 2022 14:43:17 -0800 (PST)
+Received: from localhost ([::1]:38076 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHD2N-000791-Gs
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 18:03:11 -0500
-Received: from eggs.gnu.org ([209.51.188.92]:35882)
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCj6-0006ze-E1
+	for importer@patchew.org; Mon, 07 Feb 2022 17:43:16 -0500
+Received: from eggs.gnu.org ([209.51.188.92]:33290)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <qemu_oss@crudebyte.com>)
- id 1nHCvf-0000kH-UR
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:56:15 -0500
-Received: from kylie.crudebyte.com ([5.189.157.229]:45839)
- by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
- (Exim 4.90_1) (envelope-from <qemu_oss@crudebyte.com>)
- id 1nHCvd-0007zC-PL
- for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:56:15 -0500
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
- d=crudebyte.com; s=kylie; h=Content-Type:Content-Transfer-Encoding:
- MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
- Content-ID:Content-Description;
- bh=V/veNjeb63bgrUfjGzzUVR29/f6CXeLyHE37pzA9okI=; b=U7cmmCUc1Lc/7xmMrij5lwjJDw
- dfpR9TopcwLu29ds1fRgjvVDf4oyvd7VxWQCJSExkVc9XhGx67cNvhSbLRxqAS9AkmgbwxFhHiNyD
- STQJymdiPIJNfU60Z1IHGcivf73hgxnF8XfpeRVZKmoDks/nSuBmvM7A+2fQXwdIpJ+neRB9pfcdx
- 0HuioHzZcMNA6ECb8GQusa9zFV46lcA00dZcfl5AQg337S0zZTfzwgg5xT77XIwGtktlMi+ebDvze
- g9hjbpcKkVTQxhHUXqCd8q/paTC09aUTixh/OfFN1aJ/fSr8MqF87RG4ZO4MUzmXgPEePw6n40QkH
- xyHOeA17iEYn09wssjqct9ajFb0v7Y2iHsLaaVW8TTqB0l55Ck5HKzWiPzVD2hCl0s7WTLSbpMugO
- Bn6I0vUQHc7vY0uB7CZL9ViBalsJbSPMFcV810mWa4yUNYjsBw45cFIEaGg7q9BK5dJpXPyMydjWY
- rXq055FtWGKpYvYb7c/9nlCDvhfB3iUS60pArYpWzBQAvabVo8WE2tVogxNO8k8+59hgIgbJ1GGBY
- RiPdHVbFgx7FpGiIPnIJ3gHMfiVCVa4fhK7djORKIZX2wduuB71+NJEmSWpq7ae9c7W9vDSTZR9dZ
- QTYDzXD0DdoXpiM2B7ilxwrETQwwc5BV/81OUKdmw=;
-From: Christian Schoenebeck <qemu_oss@crudebyte.com>
-To: Will Cohen <wwcohen@gmail.com>
-Cc: qemu-devel@nongnu.org, hi@alyssa.is, Greg Kurz <groug@kaod.org>,
- Paolo Bonzini <pbonzini@redhat.com>, Thomas Huth <thuth@redhat.com>,
- Laurent Vivier <lvivier@redhat.com>, Keno Fischer <keno@juliacomputing.com>,
- Michael Roitzsch <reactorcontrol@icloud.com>
-Subject: Re: [PATCH v5 09/11] 9p: darwin: Implement compatibility for mknodat
-Date: Mon, 07 Feb 2022 23:56:10 +0100
-Message-ID: <2714656.jhBehFKKHS@silver>
-In-Reply-To: <20220207224024.87745-10-wwcohen@gmail.com>
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCge-0003yE-3E
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:44 -0500
+Received: from [2607:f8b0:4864:20::f2f] (port=42749
+ helo=mail-qv1-xf2f.google.com)
+ by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgb-0005j5-5l
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:43 -0500
+Received: by mail-qv1-xf2f.google.com with SMTP id k9so12607614qvv.9
+ for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:39 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.37
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
+ h=from:to:cc:subject:date:message-id:in-reply-to:references
+ :mime-version:content-transfer-encoding;
+ bh=LvnPEGx9iqV8W0nDvi4JEWZEM9Qvo0QihLOjBamLuVQ=;
+ b=LF8Je+PsVsMKRmEcObOt6PDHPVMMwysq+HoaVvGiuejR9cy5r6S4v3qS+PQoHn3mMo
+ 7yNfEvyfrU7eMlZ92g5q0Vdhmu2EDzw73fP3XACJSmrEyX7hMyFQwElQRR8BLRku2Cfj
+ DVvFuHEBpQAjiTxUqEhQKpEo/h936AwtarUttV7VQh5Rj+JjqF0Vkhhid+Vq5D+Lvcs2
+ wsu/pmFpo/AV7fBSWpASCilcA0UbFUF/IyVJCzqVz7gevgXzLtQYKeUDwJSUMrTizsUZ
+ hE2j3NfYNvawb0gVbE8gd54h17BT8kGtlDFB3nQKkI3X43/oizqqJcTSGRgHZYoMfWpx
+ 2M+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20210112;
+ h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+ :references:mime-version:content-transfer-encoding;
+ bh=LvnPEGx9iqV8W0nDvi4JEWZEM9Qvo0QihLOjBamLuVQ=;
+ b=IpI6VGeL1NLM6/DtO3OSji40S7YdzZOLZ/jpQZ1H0v9CPaMiLTI01cygUSKRRU2xqH
+ EjaRyLHG/YdXYVbMWeLc/EJfl7RSdVtAWsagiq31Ut6R+N50jBZZ0DIpJqBTKypU6hP/
+ LF8OIXy9ZyGpQw+ygP3dLTUq3DfovVrCAXFlea999qGsmQLE4LMYXFC4btsYiS6lBmsk
+ aOvGSRFlqJUekz92oI5u6gmaWMv+oQhuWiAV2ytUZ7BdxPvndRGSxiT1+5VcP78PzGWW
+ Qt2uNJyqfJMLUpMqCrxQrCOZR3SG/1i4VlOKJSPIYmfVkANlxQlRxZLHS9ipEVPEj8ll
+ XvAQ==
+X-Gm-Message-State: AOAM532TYO/GgsoaNoNXaQxqbL7xgZotVItTLDhFH+JR1v4I2a3BECWy
+ 8rngLv0zstqGYGOUBeoQhPH+e6sVRBdBjA==
+X-Google-Smtp-Source: 
+ ABdhPJxZ+DbF1nMD9KVIdj22UnG8dCU3MoN6JirHMiCVfBeSO3wRPYzHs9QFg8+jNsCWp+oSgwN9pw==
+X-Received: by 2002:a05:6214:20af:: with SMTP id
+ 15mr1234558qvd.105.1644273638595;
+ Mon, 07 Feb 2022 14:40:38 -0800 (PST)
+From: Will Cohen <wwcohen@gmail.com>
+To: qemu-devel@nongnu.org
+Subject: [PATCH v5 09/11] 9p: darwin: Implement compatibility for mknodat
+Date: Mon,  7 Feb 2022 17:40:22 -0500
+Message-Id: <20220207224024.87745-10-wwcohen@gmail.com>
+X-Mailer: git-send-email 2.32.0 (Apple Git-132)
+In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
- <20220207224024.87745-10-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
-Received-SPF: pass client-ip=5.189.157.229;
- envelope-from=qemu_oss@crudebyte.com; helo=kylie.crudebyte.com
-X-Spam_score_int: -20
-X-Spam_score: -2.1
-X-Spam_bar: --
-X-Spam_report: (-2.1 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
- DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, SPF_HELO_NONE=0.001,
- SPF_PASS=-0.001, T_SCC_BODY_TEXT_LINE=-0.01 autolearn=ham autolearn_force=no
+Content-Transfer-Encoding: quoted-printable
+X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2f
+ (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
+Received-SPF: pass client-ip=2607:f8b0:4864:20::f2f;
+ envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2f.google.com
+X-Spam_score_int: -12
+X-Spam_score: -1.3
+X-Spam_bar: -
+X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
+ DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
+ PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
+ SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
+ T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
 X-Spam_action: no action
 X-BeenThere: qemu-devel@nongnu.org
 X-Mailman-Version: 2.1.29
@@ -2206,162 +1811,159 @@ List-Post: <mailto:qemu-devel@nongnu.org>
 List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
 List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
  <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
+ Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
+ hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
+ Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
+ Keno Fischer <keno@juliacomputing.com>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644273799864100001
+Content-Type: text/plain; charset="utf-8"
 
-On Montag, 7. Februar 2022 23:40:22 CET Will Cohen wrote:
-> From: Keno Fischer <keno@juliacomputing.com>
-> 
-> Darwin does not support mknodat. However, to avoid race conditions
-> with later setting the permissions, we must avoid using mknod on
-> the full path instead. We could try to fchdir, but that would cause
-> problems if multiple threads try to call mknodat at the same time.
-> However, luckily there is a solution: Darwin includes a function
-> that sets the cwd for the current thread only.
-> This should suffice to use mknod safely.
-> 
-> This function (pthread_fchdir_np) is protected by a check in
-> meson in a patch later in tihs series.
-> 
-> Signed-off-by: Keno Fischer <keno@juliacomputing.com>
-> Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
-> [Will Cohen: - Adjust coding style
->              - Replace clang references with gcc
->              - Note radar filed with Apple for missing syscall
->              - Replace direct syscall with pthread_fchdir_np and
->                adjust patch notes accordingly
->              - Move qemu_mknodat from 9p-util to osdep and os-posix]
-> Signed-off-by: Will Cohen <wwcohen@gmail.com>
-> ---
+From: Keno Fischer <keno@juliacomputing.com>
 
-Like already mentioned by me moments ago on previous v4 (just echoing) ...
+Darwin does not support mknodat. However, to avoid race conditions
+with later setting the permissions, we must avoid using mknod on
+the full path instead. We could try to fchdir, but that would cause
+problems if multiple threads try to call mknodat at the same time.
+However, luckily there is a solution: Darwin includes a function
+that sets the cwd for the current thread only.
+This should suffice to use mknod safely.
 
->  hw/9pfs/9p-local.c   |  4 ++--
->  include/qemu/osdep.h | 10 ++++++++++
->  os-posix.c           | 34 ++++++++++++++++++++++++++++++++++
->  3 files changed, 46 insertions(+), 2 deletions(-)
-> 
-> diff --git a/hw/9pfs/9p-local.c b/hw/9pfs/9p-local.c
-> index a0d08e5216..d42ce6d8b8 100644
-> --- a/hw/9pfs/9p-local.c
-> +++ b/hw/9pfs/9p-local.c
-> @@ -682,7 +682,7 @@ static int local_mknod(FsContext *fs_ctx, V9fsPath
-> *dir_path,
-> 
->      if (fs_ctx->export_flags & V9FS_SM_MAPPED ||
->          fs_ctx->export_flags & V9FS_SM_MAPPED_FILE) {
-> -        err = mknodat(dirfd, name, fs_ctx->fmode | S_IFREG, 0);
-> +        err = qemu_mknodat(dirfd, name, fs_ctx->fmode | S_IFREG, 0);
->          if (err == -1) {
->              goto out;
->          }
-> @@ -697,7 +697,7 @@ static int local_mknod(FsContext *fs_ctx, V9fsPath
-> *dir_path, }
->      } else if (fs_ctx->export_flags & V9FS_SM_PASSTHROUGH ||
->                 fs_ctx->export_flags & V9FS_SM_NONE) {
-> -        err = mknodat(dirfd, name, credp->fc_mode, credp->fc_rdev);
-> +        err = qemu_mknodat(dirfd, name, credp->fc_mode, credp->fc_rdev);
->          if (err == -1) {
->              goto out;
->          }
-> diff --git a/include/qemu/osdep.h b/include/qemu/osdep.h
-> index d1660d67fa..f3a8367ece 100644
-> --- a/include/qemu/osdep.h
-> +++ b/include/qemu/osdep.h
-> @@ -810,3 +810,13 @@ static inline int
-> platform_does_not_support_system(const char *command) #endif
-> 
->  #endif
-> +
-> +/*
-> + * As long as mknodat is not available on macOS, this workaround
-> + * using pthread_fchdir_np is needed. qemu_mknodat is defined in
-> + * os-posix.c
-> + */
-> +#ifdef CONFIG_DARWIN
-> +int pthread_fchdir_np(int fd);
-> +#endif
+This function (pthread_fchdir_np) is protected by a check in
+meson in a patch later in tihs series.
 
-I would make that:
+Signed-off-by: Keno Fischer <keno@juliacomputing.com>
+Signed-off-by: Michael Roitzsch <reactorcontrol@icloud.com>
+[Will Cohen: - Adjust coding style
+             - Replace clang references with gcc
+             - Note radar filed with Apple for missing syscall
+             - Replace direct syscall with pthread_fchdir_np and
+               adjust patch notes accordingly
+             - Move qemu_mknodat from 9p-util to osdep and os-posix]
+Signed-off-by: Will Cohen <wwcohen@gmail.com>
+---
+ hw/9pfs/9p-local.c   |  4 ++--
+ include/qemu/osdep.h | 10 ++++++++++
+ os-posix.c           | 34 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 46 insertions(+), 2 deletions(-)
 
-#ifdef CONFIG_DARWIN
-int pthread_fchdir_np(int fd) API_AVAILABLE(macosx(10.12));
-#endif
-
-here and ...
-
-> +int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev);
-> diff --git a/os-posix.c b/os-posix.c
-> index ae6c9f2a5e..95c1607065 100644
-> --- a/os-posix.c
-> +++ b/os-posix.c
-> @@ -24,6 +24,7 @@
->   */
-> 
->  #include "qemu/osdep.h"
-> +#include <os/availability.h>
->  #include <sys/wait.h>
->  #include <pwd.h>
->  #include <grp.h>
-> @@ -332,3 +333,36 @@ int os_mlock(void)
->      return -ENOSYS;
->  #endif
->  }
-> +
-> +/*
-> + * As long as mknodat is not available on macOS, this workaround
-> + * using pthread_fchdir_np is needed.
-> + *
-> + * Radar filed with Apple for implementing mknodat:
-> + * rdar://FB9862426 (https://openradar.appspot.com/FB9862426)
-> + */
-> +#ifdef CONFIG_DARWIN
-> +
-> +int pthread_fchdir_np(int fd) API_AVAILABLE(macosx(10.12));
-
-... drop the duplicate declaration of pthread_fchdir_np() here.
-
-> +
-> +int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev)
-> +{
-> +    int preserved_errno, err;
-> +    if (pthread_fchdir_np(dirfd) < 0) {
-> +        return -1;
-> +    }
-> +    err = mknod(filename, mode, dev);
-> +    preserved_errno = errno;
-> +    /* Stop using the thread-local cwd */
-> +    pthread_fchdir_np(-1);
-> +    if (err < 0) {
-> +        errno = preserved_errno;
-> +    }
-> +    return err;
-> +}
-> +#else
-> +int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev)
-> +{
-> +    return mknodat(dirfd, filename, mode, dev);
-> +}
-> +#endif
+diff --git a/hw/9pfs/9p-local.c b/hw/9pfs/9p-local.c
+index a0d08e5216..d42ce6d8b8 100644
+--- a/hw/9pfs/9p-local.c
++++ b/hw/9pfs/9p-local.c
+@@ -682,7 +682,7 @@ static int local_mknod(FsContext *fs_ctx, V9fsPath *dir=
+_path,
+=20
+     if (fs_ctx->export_flags & V9FS_SM_MAPPED ||
+         fs_ctx->export_flags & V9FS_SM_MAPPED_FILE) {
+-        err =3D mknodat(dirfd, name, fs_ctx->fmode | S_IFREG, 0);
++        err =3D qemu_mknodat(dirfd, name, fs_ctx->fmode | S_IFREG, 0);
+         if (err =3D=3D -1) {
+             goto out;
+         }
+@@ -697,7 +697,7 @@ static int local_mknod(FsContext *fs_ctx, V9fsPath *dir=
+_path,
+         }
+     } else if (fs_ctx->export_flags & V9FS_SM_PASSTHROUGH ||
+                fs_ctx->export_flags & V9FS_SM_NONE) {
+-        err =3D mknodat(dirfd, name, credp->fc_mode, credp->fc_rdev);
++        err =3D qemu_mknodat(dirfd, name, credp->fc_mode, credp->fc_rdev);
+         if (err =3D=3D -1) {
+             goto out;
+         }
+diff --git a/include/qemu/osdep.h b/include/qemu/osdep.h
+index d1660d67fa..f3a8367ece 100644
+--- a/include/qemu/osdep.h
++++ b/include/qemu/osdep.h
+@@ -810,3 +810,13 @@ static inline int platform_does_not_support_system(con=
+st char *command)
+ #endif
+=20
+ #endif
++
++/*
++ * As long as mknodat is not available on macOS, this workaround
++ * using pthread_fchdir_np is needed. qemu_mknodat is defined in
++ * os-posix.c
++ */
++#ifdef CONFIG_DARWIN
++int pthread_fchdir_np(int fd);
++#endif
++int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev);
+diff --git a/os-posix.c b/os-posix.c
+index ae6c9f2a5e..95c1607065 100644
+--- a/os-posix.c
++++ b/os-posix.c
+@@ -24,6 +24,7 @@
+  */
+=20
+ #include "qemu/osdep.h"
++#include <os/availability.h>
+ #include <sys/wait.h>
+ #include <pwd.h>
+ #include <grp.h>
+@@ -332,3 +333,36 @@ int os_mlock(void)
+     return -ENOSYS;
+ #endif
+ }
++
++/*
++ * As long as mknodat is not available on macOS, this workaround
++ * using pthread_fchdir_np is needed.
++ *
++ * Radar filed with Apple for implementing mknodat:
++ * rdar://FB9862426 (https://openradar.appspot.com/FB9862426)
++ */
++#ifdef CONFIG_DARWIN
++
++int pthread_fchdir_np(int fd) API_AVAILABLE(macosx(10.12));
++
++int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev)
++{
++    int preserved_errno, err;
++    if (pthread_fchdir_np(dirfd) < 0) {
++        return -1;
++    }
++    err =3D mknod(filename, mode, dev);
++    preserved_errno =3D errno;
++    /* Stop using the thread-local cwd */
++    pthread_fchdir_np(-1);
++    if (err < 0) {
++        errno =3D preserved_errno;
++    }
++    return err;
++}
++#else
++int qemu_mknodat(int dirfd, const char *filename, mode_t mode, dev_t dev)
++{
++    return mknodat(dirfd, filename, mode, dev);
++}
++#endif
+--=20
+2.32.0 (Apple Git-132)
 
 
-
-
-From mboxrd@z Thu Jan  1 00:00:00 1970
-Return-Path: <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
-X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
-	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from lists.gnu.org (lists.gnu.org [209.51.188.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.lore.kernel.org (Postfix) with ESMTPS id C5A85C433EF
-	for <qemu-devel@archiver.kernel.org>; Mon,  7 Feb 2022 23:03:26 +0000 (UTC)
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644275016378424.32156373241935;
+ Mon, 7 Feb 2022 15:03:36 -0800 (PST)
 Received: from localhost ([::1]:46392 helo=lists1p.gnu.org)
 	by lists.gnu.org with esmtp (Exim 4.90_1)
-	(envelope-from <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>)
-	id 1nHD2b-0007dk-Pk
-	for qemu-devel@archiver.kernel.org; Mon, 07 Feb 2022 18:03:25 -0500
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHD2l-0007dk-7m
+	for importer@patchew.org; Mon, 07 Feb 2022 18:03:35 -0500
 Received: from eggs.gnu.org ([209.51.188.92]:33302)
  by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
  (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCge-0003yl-Pd
@@ -2373,6 +1975,12 @@ Received: from [2607:f8b0:4864:20::f2a] (port=37599
  for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:44 -0500
 Received: by mail-qv1-xf2a.google.com with SMTP id a19so5870014qvm.4
  for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:41 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.39
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
  h=from:to:cc:subject:date:message-id:in-reply-to:references
  :mime-version:content-transfer-encoding;
@@ -2396,16 +2004,11 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  YZEA==
 X-Gm-Message-State: AOAM5302kTaVp9NVfgGnIDAbnWlT/voC4gkx7eF7nJsNtil7hTqYhCf5
  L8zxWt7Nh9AwHvFPO+YstPBa9hrTw6S4ZQ==
-X-Google-Smtp-Source: ABdhPJxZWM8UAVJrqB5G+EAAu7EfGjQa+dPj9urGu19uJMI1nsqgeg6fg4floc91WdcLGLenthj1gg==
+X-Google-Smtp-Source: 
+ ABdhPJxZWM8UAVJrqB5G+EAAu7EfGjQa+dPj9urGu19uJMI1nsqgeg6fg4floc91WdcLGLenthj1gg==
 X-Received: by 2002:a05:6214:1d05:: with SMTP id
- e5mr1172785qvd.28.1644273640289; 
+ e5mr1172785qvd.28.1644273640289;
  Mon, 07 Feb 2022 14:40:40 -0800 (PST)
-Received: from localhost.localdomain
- (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
- [209.6.248.219])
- by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.39
- (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
- Mon, 07 Feb 2022 14:40:39 -0800 (PST)
 From: Will Cohen <wwcohen@gmail.com>
 To: qemu-devel@nongnu.org
 Subject: [PATCH v5 10/11] 9p: darwin: meson: Allow VirtFS on Darwin
@@ -2415,9 +2018,13 @@ X-Mailer: git-send-email 2.32.0 (Apple Git-132)
 In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
 References: <20220207224024.87745-1-wwcohen@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::f2a
  (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
 Received-SPF: pass client-ip=2607:f8b0:4864:20::f2a;
  envelope-from=wwcohen@gmail.com; helo=mail-qv1-xf2a.google.com
 X-Spam_score_int: -12
@@ -2445,9 +2052,11 @@ Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
  hi@alyssa.is, Michael Roitzsch <reactorcontrol@icloud.com>,
  Will Cohen <wwcohen@gmail.com>, Paolo Bonzini <pbonzini@redhat.com>,
  Keno Fischer <keno@juliacomputing.com>
-Errors-To: qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org
-Sender: "Qemu-devel"
- <qemu-devel-bounces+qemu-devel=archiver.kernel.org@nongnu.org>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644275017330100001
+Content-Type: text/plain; charset="utf-8"
 
 From: Keno Fischer <keno@juliacomputing.com>
 
@@ -2484,7 +2093,7 @@ index adf57cc43e..b632b66348 100644
  ), if_false: files('qemu-fsdev-dummy.c'))
  softmmu_ss.add_all(when: 'CONFIG_LINUX', if_true: fsdev_ss)
 +softmmu_ss.add_all(when: 'CONFIG_DARWIN', if_true: fsdev_ss)
- 
+=20
  if have_virtfs_proxy_helper
    executable('virtfs-proxy-helper',
 diff --git a/meson.build b/meson.build
@@ -2494,33 +2103,190 @@ index 5f43355071..c1d13209ff 100644
 @@ -1421,17 +1421,23 @@ if not get_option('dbus_display').disabled()
    endif
  endif
- 
--have_virtfs = (targetos == 'linux' and
-+if targetos == 'darwin' and cc.has_function('pthread_fchdir_np')
-+  have_virtfs = have_system
+=20
+-have_virtfs =3D (targetos =3D=3D 'linux' and
++if targetos =3D=3D 'darwin' and cc.has_function('pthread_fchdir_np')
++  have_virtfs =3D have_system
 +else
-+  have_virtfs = (targetos == 'linux' and
++  have_virtfs =3D (targetos =3D=3D 'linux' and
      have_system and
      libattr.found() and
      libcap_ng.found())
 +endif
- 
--have_virtfs_proxy_helper = have_virtfs and have_tools
-+have_virtfs_proxy_helper = targetos != 'darwin' and have_virtfs and have_tools
- 
+=20
+-have_virtfs_proxy_helper =3D have_virtfs and have_tools
++have_virtfs_proxy_helper =3D targetos !=3D 'darwin' and have_virtfs and ha=
+ve_tools
+=20
  if get_option('virtfs').enabled()
    if not have_virtfs
--    if targetos != 'linux'
+-    if targetos !=3D 'linux'
 -      error('virtio-9p (virtfs) requires Linux')
-+    if targetos != 'linux' and targetos != 'darwin'
++    if targetos !=3D 'linux' and targetos !=3D 'darwin'
 +      error('virtio-9p (virtfs) requires Linux or macOS')
-+    elif targetos == 'darwin' and not cc.has_function('pthread_fchdir_np')
-+      error('virtio-9p (virtfs) on Darwin requires the presence of pthread_fchdir_np')
++    elif targetos =3D=3D 'darwin' and not cc.has_function('pthread_fchdir_=
+np')
++      error('virtio-9p (virtfs) on Darwin requires the presence of pthread=
+_fchdir_np')
      elif not libcap_ng.found() or not libattr.found()
-       error('virtio-9p (virtfs) requires libcap-ng-devel and libattr-devel')
+       error('virtio-9p (virtfs) requires libcap-ng-devel and libattr-devel=
+')
      elif not have_system
--- 
+--=20
 2.32.0 (Apple Git-132)
 
 
+From nobody Mon Feb  7 23:49:51 2022
+Delivered-To: importer@patchew.org
+Authentication-Results: mx.zohomail.com;
+	dkim=fail;
+	spf=pass (zohomail.com: domain of gnu.org designates 209.51.188.17 as
+ permitted sender)
+  smtp.mailfrom=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+	dmarc=fail(p=none dis=none)  header.from=gmail.com
+Return-Path: <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+Received: from lists.gnu.org (lists.gnu.org [209.51.188.17]) by
+ mx.zohomail.com
+	with SMTPS id 1644273803080535.261874769829;
+ Mon, 7 Feb 2022 14:43:23 -0800 (PST)
+Received: from localhost ([::1]:38166 helo=lists1p.gnu.org)
+	by lists.gnu.org with esmtp (Exim 4.90_1)
+	(envelope-from <qemu-devel-bounces+importer=patchew.org@nongnu.org>)
+	id 1nHCjC-000731-4v
+	for importer@patchew.org; Mon, 07 Feb 2022 17:43:22 -0500
+Received: from eggs.gnu.org ([209.51.188.92]:33306)
+ by lists.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgf-0003yt-I6
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:45 -0500
+Received: from [2607:f8b0:4864:20::72c] (port=34476
+ helo=mail-qk1-x72c.google.com)
+ by eggs.gnu.org with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+ (Exim 4.90_1) (envelope-from <wwcohen@gmail.com>) id 1nHCgd-0005jV-Ko
+ for qemu-devel@nongnu.org; Mon, 07 Feb 2022 17:40:45 -0500
+Received: by mail-qk1-x72c.google.com with SMTP id bs32so12329398qkb.1
+ for <qemu-devel@nongnu.org>; Mon, 07 Feb 2022 14:40:42 -0800 (PST)
+Received: from localhost.localdomain
+ (209-6-248-219.s2265.c3-0.wrx-ubr1.sbo-wrx.ma.cable.rcncustomer.com.
+ [209.6.248.219])
+ by smtp.gmail.com with ESMTPSA id j14sm6444744qko.10.2022.02.07.14.40.40
+ (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+ Mon, 07 Feb 2022 14:40:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
+ h=from:to:cc:subject:date:message-id:in-reply-to:references
+ :mime-version:content-transfer-encoding;
+ bh=EuU6f2hsAisKalSy17XW/VmARf7CzBCyb+vigrLGnrQ=;
+ b=mDcIkdQIPRA7YtIM/102EeTRyCxkcQmF87Jo5Y13hn3As1Pv+f7ho6MMwg/eJX22yQ
+ g1iNZPEqEbXg0qhk78v64ijkJliOJ7ylvLr2rdrd6Vm4dEtbzgniiKZvMxTblDsm7v0G
+ Ob5GLJHLM4yzQl2pstPkVjbITxJcbMFwJqaLGMDtIbLA6N3aJN+RbHKmtBBKmeyYCcln
+ sCi536sh7MqgMw3hbMWpnQZUsV4f/AuwXiKl36ymI4+SsV8QbGBivdtqvWolskgEaTlu
+ u3qMhcZN8BoURtQQ9Pc2OKG1sMI+sbG7pMyWCZtmYuzm4AFhrTsrji6+6d8Cj8iEa+2I
+ zXfA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20210112;
+ h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+ :references:mime-version:content-transfer-encoding;
+ bh=EuU6f2hsAisKalSy17XW/VmARf7CzBCyb+vigrLGnrQ=;
+ b=K5Xie1KD9QStKZL//n81W8Ziq6bl9sJy7B4RzbntfyHZnXcfjU1ernfddOhZR2oZLK
+ fJO9SLxtFWh8INDry2JiHux5CAY93Xqh3DuPoPS0P2eg/lfHvmqvyATiSKUnLJCwcTv/
+ YrWiUUCcXlEslWqFsozIC0VMDB+Wp0zxBoSyFNvZBaWydFs+esNkOZgC8u0jLL0MGHFs
+ Y39/TLyPBBAswEn1iGHHyQbUFxMCakg8JvnzkwFWf7FBHgMQP2XgTwVupZg8GaTHQfIY
+ rpX9jAxphC1KiggXk4hI/FHwXeaoVLlcnaapEV7VqTKbFDMpto9iSyFKn12VL67ryiNC
+ NxKQ==
+X-Gm-Message-State: AOAM531G+ZVXHngHgQtlbNmTjgYvyJfoqw6W+Ypp1boK3UeR74OR4qZk
+ 85XXt7ZzLV/hoEFB+5+XWIxU5irmi/ZOyw==
+X-Google-Smtp-Source: 
+ ABdhPJyBfSOjCc3SFDldBKj7WE4ozjwy5wym1ZFLg1bcXC5yKLcqP7rSHnty4hYKYxqdQENMyHKaaw==
+X-Received: by 2002:a05:620a:4151:: with SMTP id
+ k17mr1178093qko.630.1644273641489;
+ Mon, 07 Feb 2022 14:40:41 -0800 (PST)
+From: Will Cohen <wwcohen@gmail.com>
+To: qemu-devel@nongnu.org
+Subject: [PATCH v5 11/11] 9p: darwin: Adjust assumption on virtio-9p-test
+Date: Mon,  7 Feb 2022 17:40:24 -0500
+Message-Id: <20220207224024.87745-12-wwcohen@gmail.com>
+X-Mailer: git-send-email 2.32.0 (Apple Git-132)
+In-Reply-To: <20220207224024.87745-1-wwcohen@gmail.com>
+References: <20220207224024.87745-1-wwcohen@gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-Host-Lookup-Failed: Reverse DNS lookup failed for 2607:f8b0:4864:20::72c
+ (failed)
+Received-SPF: pass (zohomail.com: domain of gnu.org designates 209.51.188.17
+ as permitted sender) client-ip=209.51.188.17;
+ envelope-from=qemu-devel-bounces+importer=patchew.org@nongnu.org;
+ helo=lists.gnu.org;
+Received-SPF: pass client-ip=2607:f8b0:4864:20::72c;
+ envelope-from=wwcohen@gmail.com; helo=mail-qk1-x72c.google.com
+X-Spam_score_int: -12
+X-Spam_score: -1.3
+X-Spam_bar: -
+X-Spam_report: (-1.3 / 5.0 requ) BAYES_00=-1.9, DKIM_SIGNED=0.1,
+ DKIM_VALID=-0.1, DKIM_VALID_AU=-0.1, DKIM_VALID_EF=-0.1, FREEMAIL_FROM=0.001,
+ PDS_HP_HELO_NORDNS=0.001, RCVD_IN_DNSWL_NONE=-0.0001, RDNS_NONE=0.793,
+ SPF_HELO_NONE=0.001, SPF_PASS=-0.001,
+ T_SCC_BODY_TEXT_LINE=-0.01 autolearn=no autolearn_force=no
+X-Spam_action: no action
+X-BeenThere: qemu-devel@nongnu.org
+X-Mailman-Version: 2.1.29
+Precedence: list
+List-Id: <qemu-devel.nongnu.org>
+List-Unsubscribe: <https://lists.nongnu.org/mailman/options/qemu-devel>,
+ <mailto:qemu-devel-request@nongnu.org?subject=unsubscribe>
+List-Archive: <https://lists.nongnu.org/archive/html/qemu-devel>
+List-Post: <mailto:qemu-devel@nongnu.org>
+List-Help: <mailto:qemu-devel-request@nongnu.org?subject=help>
+List-Subscribe: <https://lists.nongnu.org/mailman/listinfo/qemu-devel>,
+ <mailto:qemu-devel-request@nongnu.org?subject=subscribe>
+Cc: Laurent Vivier <lvivier@redhat.com>, Thomas Huth <thuth@redhat.com>,
+ Fabian Franz <fabianfranz.oss@gmail.com>,
+ Christian Schoenebeck <qemu_oss@crudebyte.com>, Greg Kurz <groug@kaod.org>,
+ hi@alyssa.is, Will Cohen <wwcohen@gmail.com>,
+ Paolo Bonzini <pbonzini@redhat.com>
+Errors-To: qemu-devel-bounces+importer=patchew.org@nongnu.org
+Sender: "Qemu-devel" <qemu-devel-bounces+importer=patchew.org@nongnu.org>
+X-ZohoMail-DKIM: fail (Header signature does not verify)
+X-ZM-MESSAGEID: 1644273804414100001
+Content-Type: text/plain; charset="utf-8"
+
+The previous test depended on the assumption that P9_DOTL_AT_REMOVEDIR
+and AT_REMOVEDIR have the same value.
+
+While this is true on Linux, it is not true everywhere, and leads to an
+incorrect test failure on unlink_at, noticed when adding 9p to darwin:
+
+Received response 7 (RLERROR) instead of 77 (RUNLINKAT)
+Rlerror has errno 22 (Invalid argument)
+**
+
+ERROR:../tests/qtest/virtio-9p-test.c:305:v9fs_req_recv: assertion
+failed (hdr.id =3D=3D id): (7 =3D=3D 77) Bail out!
+
+ERROR:../tests/qtest/virtio-9p-test.c:305:v9fs_req_recv: assertion
+failed (hdr.id =3D=3D id): (7 =3D=3D 77)
+
+Signed-off-by: Fabian Franz <fabianfranz.oss@gmail.com>
+[Will Cohen: - Add explanation of patch and description
+               of pre-patch test failure]
+Signed-off-by: Will Cohen <wwcohen@gmail.com>
+Acked-by: Thomas Huth <thuth@redhat.com>
+---
+ tests/qtest/virtio-9p-test.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/qtest/virtio-9p-test.c b/tests/qtest/virtio-9p-test.c
+index 41fed41de1..6bcf89f0f8 100644
+--- a/tests/qtest/virtio-9p-test.c
++++ b/tests/qtest/virtio-9p-test.c
+@@ -1270,7 +1270,7 @@ static void fs_unlinkat_dir(void *obj, void *data, QG=
+uestAllocator *t_alloc)
+     /* ... and is actually a directory */
+     g_assert((st.st_mode & S_IFMT) =3D=3D S_IFDIR);
+=20
+-    do_unlinkat(v9p, "/", "02", AT_REMOVEDIR);
++    do_unlinkat(v9p, "/", "02", P9_DOTL_AT_REMOVEDIR);
+     /* directory should be gone now */
+     g_assert(stat(new_dir, &st) !=3D 0);
+=20
+--=20
+2.32.0 (Apple Git-132)
 
