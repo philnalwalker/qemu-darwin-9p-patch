@@ -1492,7 +1492,6 @@ index 1b28e70040..12443b6ad5 100644
 @@ -14,6 +14,7 @@ fs_ss.add(files(
    'coxattr.c',
  ))
- fs_ss.add(when: 'CONFIG_LINUX', if_true: files('9p-util-linux.c'))
 +fs_ss.add(when: 'CONFIG_DARWIN', if_true: files('9p-util-darwin.c'))
  fs_ss.add(when: 'CONFIG_XEN', if_true: files('xen-9p-backend.c'))
  softmmu_ss.add_all(when: 'CONFIG_FSDEV_9P', if_true: fs_ss)
@@ -2481,7 +2480,6 @@ index adf57cc43e..b632b66348 100644
 @@ -7,6 +7,7 @@ fsdev_ss.add(when: ['CONFIG_FSDEV_9P'], if_true: files(
    'qemu-fsdev.c',
  ), if_false: files('qemu-fsdev-dummy.c'))
- softmmu_ss.add_all(when: 'CONFIG_LINUX', if_true: fsdev_ss)
 +softmmu_ss.add_all(when: 'CONFIG_DARWIN', if_true: fsdev_ss)
  
  if have_virtfs_proxy_helper
